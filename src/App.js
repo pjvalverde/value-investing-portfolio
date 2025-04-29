@@ -8,19 +8,13 @@ import HistoricalChart from './components/HistoricalChart';
 import ComparativeTable from './components/ComparativeTable';
 
 function App() {
-  const [portfolio, setPortfolio] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [historicalData, setHistoricalData] = useState([]);
-  const [comparativeData, setComparativeData] = useState([]);
-  const [showAnalysis, setShowAnalysis] = useState(false);
-  const [analysis, setAnalysis] = useState('');
-  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [warnings, setWarnings] = useState([]);
 
   const fetchPortfolio = async (formData) => {
     setLoading(true);
     setError('');
     setShowAnalysis(false);
+    setWarnings([]);
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
       const resGen = await fetch(`${BASE_URL}/generate_portfolio`, {
@@ -29,12 +23,13 @@ function App() {
         body: JSON.stringify(formData)
       });
       if (!resGen.ok) throw new Error('No se pudo generar el portafolio');
+      const genData = await resGen.json();
+      if (genData.warnings) setWarnings(genData.warnings);
       await new Promise(res => setTimeout(res, 2000));
       const res = await fetch(`${BASE_URL}/portfolio`, { method: 'GET' });
       if (!res.ok) throw new Error('No se pudo obtener el portafolio');
       const data = await res.json();
       setPortfolio(data);
-      // (Opcional) Simula datos históricos y comparativos
       setHistoricalData([
         { date: '2022-01', value: 100, CompanyA: 100, CompanyB: 100 },
         { date: '2022-06', value: 110, CompanyA: 115, CompanyB: 108 },
@@ -110,11 +105,20 @@ function App() {
       setAnalysisLoading(false);
     }
   };
+
   return (
     <div className="App" style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
       <h1>Value Investing Portfolio App</h1>
       <PortfolioForm onSubmit={fetchPortfolio} loading={loading} />
       {error && <div style={{ color: 'red' }}>{error}</div>}
+      {warnings.length > 0 && (
+        <div style={{ background: '#fff3cd', color: '#856404', padding: 12, borderRadius: 6, marginBottom: 12, border: '1px solid #ffeeba' }}>
+          <strong>Advertencia:</strong>
+          <ul style={{ margin: 0, paddingLeft: 20 }}>
+            {warnings.map((w, i) => <li key={i}>{w}</li>)}
+          </ul>
+        </div>
+      )}
       {portfolio.length > 0 && (
         <>
           <PortfolioCharts portfolio={portfolio} />
