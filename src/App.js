@@ -5,18 +5,36 @@ import PortfolioTable from './components/PortfolioTable';
 import PortfolioCharts from './components/PortfolioCharts';
 import MethodologyDoc from './components/MethodologyDoc';
 import HistoricalChart from './components/HistoricalChart';
-import ComparativeTable from './components/ComparativeTable';
+import ActionAnalysisModal from './components/ActionAnalysisModal';
 
-function App() {
-  const [portfolio, setPortfolio] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [historicalData, setHistoricalData] = useState([]);
-  const [comparativeData, setComparativeData] = useState([]);
-  const [showAnalysis, setShowAnalysis] = useState(false);
-  const [analysis, setAnalysis] = useState('');
-  const [analysisLoading, setAnalysisLoading] = useState(false);
-  const [warnings, setWarnings] = useState([]);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [selectedActionAnalysis, setSelectedActionAnalysis] = useState('');
+  const [selectedActionMetrics, setSelectedActionMetrics] = useState([]);
+
+  // Mostrar análisis individual usando Claude y métricas
+  const handleShowActionAnalysis = async (action) => {
+    setSelectedAction(action);
+    setSelectedActionAnalysis('Cargando análisis...');
+    setSelectedActionMetrics([]);
+    try {
+      const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
+      // Nuevo endpoint: /justification/accion?ticker=XXX
+      const res = await fetch(`${BASE_URL}/justification/accion?ticker=${action.ticker}`);
+      if (!res.ok) throw new Error('No se pudo obtener el análisis individual');
+      const data = await res.json();
+      setSelectedActionAnalysis(data.analysis || '');
+      // Preparar métricas para el gráfico pastel
+      const metrics = [];
+      if (action.ROE !== undefined && action.ROE !== null) metrics.push({ name: 'ROE', value: action.ROE });
+      if (action.PE !== undefined && action.PE !== null) metrics.push({ name: 'P/E', value: action.PE });
+      if (action.margen_beneficio !== undefined && action.margen_beneficio !== null) metrics.push({ name: 'Margen', value: action.margen_beneficio });
+      if (action.ratio_deuda !== undefined && action.ratio_deuda !== null) metrics.push({ name: 'Deuda', value: action.ratio_deuda });
+      if (action.crecimiento_fcf !== undefined && action.crecimiento_fcf !== null) metrics.push({ name: 'FCF', value: action.crecimiento_fcf });
+      setSelectedActionMetrics(metrics);
+    } catch (e) {
+      setSelectedActionAnalysis(`<span style='color:red'>${e.message}</span>`);
+    }
+  };
 
   const fetchPortfolio = async (formData) => {
     setLoading(true);
@@ -131,6 +149,26 @@ function App() {
         <>
           <PortfolioCharts portfolio={portfolio} />
           <PortfolioTable portfolio={portfolio} />
+          {/* Botones de acciones */}
+          <div style={{ display: 'flex', gap: 10, margin: '16px 0', flexWrap: 'wrap' }}>
+            {portfolio.filter(a => a.tipo === 'Acción').map((a) => (
+              <button
+                key={a.ticker}
+                style={{ background: '#e3eafe', color: '#2d4373', border: '1px solid #b5c7fa', borderRadius: 8, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }}
+                onClick={() => handleShowActionAnalysis(a)}
+              >
+                {a.ticker}
+              </button>
+            ))}
+          </div>
+          {/* Modal de análisis individual */}
+          <ActionAnalysisModal
+            open={!!selectedAction}
+            onClose={() => setSelectedAction(null)}
+            action={selectedAction?.ticker}
+            analysis={selectedActionAnalysis}
+            metrics={selectedActionMetrics}
+          />
           <div style={{ margin: '24px 0', display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
             <button onClick={() => fetchPortfolio()} disabled={loading}>Regenerar portafolio</button>
             <button onClick={handleShowAnalysis} disabled={analysisLoading} style={{ background: '#3b5998', color: 'white', padding: '8px 20px', borderRadius: 6 }}>
