@@ -81,4 +81,4 @@ def get_visualization(img_name: str):
 # Endpoint de prueba
 @app.get("/")
 def root():
-    return {"message": "Value Investing Portfolio API running!"}
+    return {"message": "API VIVA - TEST 2025-04-29"}
