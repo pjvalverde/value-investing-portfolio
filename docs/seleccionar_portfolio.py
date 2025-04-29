@@ -1,36 +1,17 @@
 import pandas as pd
-import numpy as np
-import json
-import matplotlib.pyplot as plt
-import seaborn as sns
 import os
 
-# Configurar estilo de visualización
-plt.style.use("seaborn-v0_8-whitegrid")
-sns.set_palette("Blues_r")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PORTFOLIO_PATH = os.path.join(BASE_DIR, "portfolio_final.csv")
 
-# Crear directorio para resultados si no existe
-if not os.path.exists("/home/ubuntu/resultados"):
-    os.makedirs("/home/ubuntu/resultados")
-
-# Cargar datos de empresas S&P 500 y China
-print("Cargando datos de empresas...")
-sp500_df = pd.read_csv("/home/ubuntu/metricas_sp500.csv")
-china_df = pd.read_csv("/home/ubuntu/metricas_china.csv")
-
-# Combinar los dataframes
-df_combinado = pd.concat([sp500_df, china_df], ignore_index=True)
-
-# Cargar datos completos para análisis más detallado
-print("Cargando datos completos...")
-try:
-    with open("/home/ubuntu/datos_sp500.json", "r") as f:
-        datos_sp500 = json.load(f)
-    
-    with open("/home/ubuntu/datos_china.json", "r") as f:
-        datos_china = json.load(f)
-    
-    datos_completos = datos_sp500 + datos_china
+if os.path.exists(PORTFOLIO_PATH):
+    print("Cargando portafolio generado...")
+    df = pd.read_csv(PORTFOLIO_PATH)
+    print("Primeras filas del portafolio:")
+    print(df.head())
+    # Puedes agregar aquí lógica adicional para análisis, visualizaciones, etc.
+else:
+    print("Error: No se encontró el archivo 'portfolio_final.csv' en la carpeta docs. Genera el portafolio primero usando la app de OpenBB o tu flujo de datos.")
 except Exception as e:
     print(f"Error al cargar datos completos: {str(e)}")
     datos_completos = []
