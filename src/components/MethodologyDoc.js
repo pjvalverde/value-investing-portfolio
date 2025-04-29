@@ -27,10 +27,8 @@ const MethodologyDoc = ({ highlightMetrics = [] }) => {
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF('p', 'mm', 'a4');
     const pageWidth = pdf.internal.pageSize.getWidth();
-      const imgProps = pdf.getImageProperties(imgData);
-    const pdfWidth = pageWidth;
-    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    const imgProps = pdf.getImageProperties(imgData);
+    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, (imgProps.height * pageWidth) / imgProps.width);
     pdf.save('metodologia_value_investing.pdf');
   };
 
