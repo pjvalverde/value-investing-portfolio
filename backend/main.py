@@ -30,15 +30,16 @@ def generate_portfolio():
 # Endpoint para obtener el portafolio generado (CSV a JSON)
 @app.get("/portfolio")
 def get_portfolio():
-    # Obtén las claves de Railway
+    """
+    Genera el portafolio dinámicamente usando OpenBB y Deepseek (simulado),
+    sin depender de archivos CSV ni de archivos en disco.
+    """
     OPENBB_TOKEN = os.getenv("OPENBB_TOKEN")
     DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
 
-    # --- Paso 1: Obtener tickers desde OpenBB (simulado si no hay clave) ---
     if not OPENBB_TOKEN:
         return JSONResponse(content={"error": "OPENBB_TOKEN no configurado en variables de entorno."}, status_code=500)
 
-    # Paso 1: Obtener tickers reales del S&P 500 desde OpenBB
     try:
         resp = requests.get(
             "https://api.openbb.dev/v1/index/sp500",
@@ -46,15 +47,12 @@ def get_portfolio():
         )
         resp.raise_for_status()
         data = resp.json()
-        tickers = data.get("constituents", [])[:10]  # Solo los primeros 10 para ejemplo
+        tickers = data.get("constituents", [])[:10]
     except Exception as e:
         return JSONResponse(content={"error": f"Error consultando OpenBB: {str(e)}"}, status_code=500)
 
-    # Paso 2: Analizar con Deepseek (simulado)
     portafolio = []
     for ticker in tickers:
-        # Aquí deberías hacer la llamada real a Deepseek si tienes la API
-        # Ejemplo simulado:
         resultado = {"ticker": ticker, "score": 0.8, "recomendacion": "BUY"}
         portafolio.append(resultado)
 
