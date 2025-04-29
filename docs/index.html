@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Value Portfolio</title>
+    <style>
+        :root {
+            --primary: #4a6fa5;
+            --secondary: #6d8cb0;
+            --light: #f8f9fb;
+            --background: #f2f4f8;
+            --text: #2d3748;
+            --border: #e2e8f0;
+            --accent: #5c8dd6;
+            --success: #68b7a0;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .portfolio-header {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .portfolio-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .portfolio-profile {
+            background-color: var(--light);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--primary);
+        }
+        .investment-preferences {
+            margin-bottom: 1.5rem;
+        }
+        .section-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: var(--text);
+        }
+        .preference-options {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .option {
+            padding: 0.5rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        .option.selected {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .investment-amount {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .amount-label {
+            min-width: 120px;
+            font-size: 0.9rem;
+        }
+        .amount-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .checkbox.checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            color: white;
+        }
+        .button {
+            padding: 0.75rem 1.5rem;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .button:hover {
+            background-color: var(--accent);
+        }
+        .button.secondary {
+            background-color: white;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+        .button.secondary:hover {
+            background-color: var(--light);
+        }
+        .portfolio-chart {
+            margin-bottom: 1.5rem;
+        }
+        .chart-container {
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .pie-chart {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--primary) 0% 30%, 
+                var(--secondary) 30% 55%, 
+                var(--accent) 55% 70%, 
+                var(--success) 70% 100%
+            );
+            position: relative;
+        }
+        .pie-center {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            background-color: white;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        .portfolio-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+        .portfolio-table th {
+            text-align: left;
+            padding: 0.75rem 1rem;
+            font-weight: 500;
+            background-color: var(--light);
+            border-bottom: 1px solid var(--border);
+        }
+        .portfolio-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .recommendation {
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            background-color: var(--success);
+            color: white;
+            display: inline-block;
+        }
+        .portfolio-optimization {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .optimization-text {
+            font-weight: 500;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+    </div>
+    <div class="info-message" style="background:#e6f2ff;color:#205081;padding:1rem 2rem;margin-bottom:2rem;border-radius:8px;font-size:1.1rem;text-align:center;">
+        Esta app desarrolla un portfolio personalizado basado en el value investing.
+    </div>
+    <div
+            <div class="logo">
+                <div class="logo-icon">V</div>
+                Value Portfolio
+            </div>
+        </div>
+        <div class="card">
+            <div class="portfolio-header">
+                <div class="portfolio-title">Tu Portafolio Personalizado</div>
+                <div class="portfolio-profile">Perfil: Moderado | Horizonte: Largo plazo</div>
+            </div>
+            <div class="investment-preferences">
+                <div class="section-title">¿En qué áreas te gustaría invertir?</div>
+                <div class="preference-options">
+                    <div class="option selected">Tecnología</div>
+                    <div class="option">Salud</div>
+                    <div class="option">Finanzas</div>
+                </div>
+                <div class="investment-amount">
+                    <div class="amount-label">Monto a invertir:</div>
+                    <input type="text" class="amount-input" value="$ 5,000">
+                </div>
+                <div class="checkbox-option">
+                    <div class="checkbox checked">✓</div>
+                    <div>Incluir bonos del Tesoro (T-Bill)</div>
+                </div>
+                <button class="button">Generar portafolio recomendado</button>
+            </div>
+        </div>
+        <div class="card portfolio-chart">
+            <div class="section-title">Distribución del portafolio</div>
+            <div class="chart-container">
+                <div class="pie-chart">
+                    <div class="pie-center"></div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="section-title">Composición del portafolio</div>
+            <table class="portfolio-table">
+                <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Sector</th>
+                        <th>Peso</th>
+                        <th>Tipo</th>
+                        <th>Recomendación</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>AAPL</td>
+                        <td>Tecnología</td>
+                        <td>15%</td>
+                        <td>Acción</td>
+                        <td><div class="recommendation">Comprar</div></td>
+                    </tr>
+                    <tr>
+                        <td>MSFT</td>
+                        <td>Tecnología</td>
+                        <td>12%</td>
+                        <td>Acción</td>
+                        <td><div class="recommendation">Comprar</div></td>
+                    </tr>
+                    <tr>
+                        <td>JNJ</td>
+                        <td>Salud</td>
+                        <td>8%</td>
+                        <td>Acción</td>
+                        <td><div class="recommendation">Mantener</div></td>
+                    </tr>
+                    <tr>
+                        <td>T-BILL</td>
+                        <td>Gobierno</td>
+                        <td>25%</td>
+                        <td>Bono</td>
+                        <td><div class="recommendation">Comprar</div></td>
+                    </tr>
+                    <tr>
+                        <td>V</td>
+                        <td>Finanzas</td>
+                        <td>10%</td>
+                        <td>Acción</td>
+                        <td><div class="recommendation">Comprar</div></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card">
+            <div class="portfolio-optimization">
+                <div class="optimization-text">Tu portafolio está optimizado para crecimiento a largo plazo con volatilidad moderada</div>
+                <div class="action-buttons">
+                    <button class="button secondary">Regenerar portafolio</button>
+                    <button class="button">Ver análisis detallado</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

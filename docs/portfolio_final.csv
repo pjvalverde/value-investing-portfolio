@@ -1,0 +1,11 @@
+Ticker,Nombre,Sector,Precio,Soporte,Resistencia,Valoración,Descuento,Innovación,Sostenibilidad,Sentimiento_Interno,Dividendos,Recomendación,Precio_Objetivo,Mercado,puntuacion_value
+UPS,"United Parcel Service, Inc.",Industrials,0,96.57,133.58,Near Fair Value,4%,0.9581,0.3440999999999999,0.4211999999999999,0.8955,BUY,150.0,,4
+MRK,"Merck & Company, Inc.",Healthcare,0,80.02,108.97,Undervalued,15%,0.9834,0.2084,0.925,0.8093,BUY,110.0,,4
+CAT,"Caterpillar, Inc.",Industrials,0,288.65,342.34,Near Fair Value,5%,0.9958,0.6945999999999999,0.2092999999999999,0.2866,BUY,400.0,,3
+ABBV,AbbVie Inc.,Healthcare,0,176.59,193.91,Undervalued,38%,0.9451,0.3559,0.0689,0.7548999999999999,BUY,220.0,,3
+MSFT,Microsoft Corporation,Technology,0,332.89,415.32,Near Fair Value,2%,0.9766,0.3328,0.3596999999999999,0.1336,BUY,526.0,,3
+NVDA,NVIDIA Corporation,Technology,0,45.977,116.437,Near Fair Value,1%,0.885,0.0858,0.1926999999999999,0.0,BUY,150.0,,3
+META,"Meta Platforms, Inc.",Communication Services,0,191.068,329.51,Near Fair Value,-5%,0.8288,0.9856,0.0,0.013,BUY,725.0,,3
+GOOGL,Alphabet Inc.,Communication Services,0,136.57,163.86,Near Fair Value,16%,0.982,0.787,0.1765,0.0368,BUY,220.0,,3
+AMZN,"Amazon.com, Inc.",Consumer Cyclical,0,186.27,198.85,Near Fair Value,13%,0.9902,0.7646999999999999,0.0245,0.0,BUY,270.0,,3
+BAC,Bank of America Corporation,Financial Services,0,39.335,39.76,Near Fair Value,-1%,0.982,0.4457,0.2917,0.1714,BUY,47.0,,3
