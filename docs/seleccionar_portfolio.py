@@ -4,17 +4,17 @@ import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PORTFOLIO_PATH = os.path.join(BASE_DIR, "portfolio_final.csv")
 
-if os.path.exists(PORTFOLIO_PATH):
-    print("Cargando portafolio generado...")
-    df = pd.read_csv(PORTFOLIO_PATH)
-    print("Primeras filas del portafolio:")
-    print(df.head())
-    # Puedes agregar aquí lógica adicional para análisis, visualizaciones, etc.
-else:
-    print("Error: No se encontró el archivo 'portfolio_final.csv' en la carpeta docs. Genera el portafolio primero usando la app de OpenBB o tu flujo de datos.")
+try:
+    if os.path.exists(PORTFOLIO_PATH):
+        print("Cargando portafolio generado...")
+        df = pd.read_csv(PORTFOLIO_PATH)
+        print("Primeras filas del portafolio:")
+        print(df.head())
+        # Puedes agregar aquí lógica adicional para análisis, visualizaciones, etc.
+    else:
+        print("Error: No se encontró el archivo 'portfolio_final.csv' en la carpeta docs. Genera el portafolio primero usando la app de OpenBB o tu flujo de datos.")
 except Exception as e:
-    print(f"Error al cargar datos completos: {str(e)}")
-    datos_completos = []
+    print(f"Error al cargar el portafolio: {str(e)}")
 
 # Función para extraer métricas adicionales de los datos completos
 def extraer_metricas_adicionales(ticker, datos_completos):
