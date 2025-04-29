@@ -6,10 +6,23 @@ import PortfolioCharts from './components/PortfolioCharts';
 import MethodologyDoc from './components/MethodologyDoc';
 import HistoricalChart from './components/HistoricalChart';
 import ActionAnalysisModal from './components/ActionAnalysisModal';
+import ComparativeTable from './components/ComparativeTable';
 
+function App() {
   const [selectedAction, setSelectedAction] = useState(null);
   const [selectedActionAnalysis, setSelectedActionAnalysis] = useState('');
   const [selectedActionMetrics, setSelectedActionMetrics] = useState([]);
+
+  // Estados adicionales necesarios para el funcionamiento del componente
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [warnings, setWarnings] = useState([]);
+  const [portfolio, setPortfolio] = useState([]);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysis, setAnalysis] = useState('');
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [comparativeData, setComparativeData] = useState([]);
+  const [historicalData, setHistoricalData] = useState([]);
 
   // Mostrar análisis individual usando Claude y métricas
   const handleShowActionAnalysis = async (action) => {
