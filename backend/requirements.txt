@@ -4,3 +4,4 @@ pandas
 markdown
 python-multipart
 requests
+openbb

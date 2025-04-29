@@ -41,13 +41,10 @@ def get_portfolio():
         return JSONResponse(content={"error": "OPENBB_TOKEN no configurado en variables de entorno."}, status_code=500)
 
     try:
-        resp = requests.get(
-            "https://api.openbb.dev/v1/index/sp500",
-            headers={"Authorization": f"Bearer {OPENBB_TOKEN}"}
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        tickers = data.get("constituents", [])[:10]
+        from openbb import obb
+        obb.account.login(pat=OPENBB_TOKEN)
+        data = obb.indices.constituents("SP500")
+        tickers = list(data["Symbol"])[:10] if "Symbol" in data else []
     except Exception as e:
         return JSONResponse(content={"error": f"Error consultando OpenBB: {str(e)}"}, status_code=500)
 
