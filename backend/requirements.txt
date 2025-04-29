@@ -3,3 +3,4 @@ uvicorn
 pandas
 markdown
 python-multipart
+requests

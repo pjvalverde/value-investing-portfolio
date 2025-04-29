@@ -1,10 +1,11 @@
 from fastapi import FastAPI, UploadFile, File, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
-import subprocess
-import os
 import pandas as pd
 import markdown
+import os
+import requests
+import json
 
 app = FastAPI()
 
@@ -20,24 +21,43 @@ app.add_middleware(
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'docs')
 RESULTS_DIR = os.path.join(DATA_DIR, 'resultados')
 
-# Endpoint para generar el portafolio (ejecuta el script Python)
+
+# Endpoint para generar el portafolio
 @app.post("/generate_portfolio")
-def generate_portfolio(background_tasks: BackgroundTasks):
-    def run_script():
-        subprocess.run([
-            'python', os.path.join(DATA_DIR, 'seleccionar_portfolio.py')
-        ], check=True)
-    background_tasks.add_task(run_script)
-    return {"status": "Portfolio generation started"}
+def generate_portfolio():
+    return {"status": "Portfolio generation not needed, done dynamically."}
 
 # Endpoint para obtener el portafolio generado (CSV a JSON)
 @app.get("/portfolio")
 def get_portfolio():
-    portfolio_path = os.path.join(RESULTS_DIR, 'portfolio_final.csv')
-    if not os.path.exists(portfolio_path):
-        return JSONResponse(content={"error": "Portfolio not generated yet"}, status_code=404)
-    df = pd.read_csv(portfolio_path)
-    return df.to_dict(orient='records')
+    """
+    Genera el portafolio dinámicamente usando OpenBB y Deepseek (simulado),
+    sin depender de archivos CSV ni de archivos en disco.
+    """
+    OPENBB_TOKEN = os.getenv("OPENBB_TOKEN")
+    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+
+    if not OPENBB_TOKEN:
+        return JSONResponse(content={"error": "OPENBB_TOKEN no configurado en variables de entorno."}, status_code=500)
+
+    try:
+        resp = requests.get(
+            "https://api.openbb.dev/v1/index/sp500",
+            headers={"Authorization": f"Bearer {OPENBB_TOKEN}"}
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        tickers = data.get("constituents", [])[:10]
+    except Exception as e:
+        return JSONResponse(content={"error": f"Error consultando OpenBB: {str(e)}"}, status_code=500)
+
+    portafolio = []
+    for ticker in tickers:
+        resultado = {"ticker": ticker, "score": 0.8, "recomendacion": "BUY"}
+        portafolio.append(resultado)
+
+    return JSONResponse(content=portafolio)
+
 
 # Endpoint para obtener la justificación (MD a HTML)
 @app.get("/justification")
@@ -61,4 +81,4 @@ def get_visualization(img_name: str):
 # Endpoint de prueba
 @app.get("/")
 def root():
-    return {"message": "Value Investing Portfolio API running!"}
+    return {"message": "API VIVA - TEST 2025-04-29"}
