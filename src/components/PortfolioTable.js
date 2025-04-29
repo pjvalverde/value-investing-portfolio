@@ -28,10 +28,17 @@ const PortfolioTable = ({ portfolio = [] }) => {
               <td>{row.tipo}</td>
               <td>{row.price ? `$${Number(row.price).toFixed(2)}` : '-'}</td>
               <td>{row.cantidad ?? '-'}</td>
-              <td>{row.inversion ? `$${row.inversion}` : '-'}</td>
+              <td>{row.inversion ? `$${Number(row.inversion).toFixed(2)}` : '-'}</td>
               <td><span style={{background: row.recomendacion === 'Comprar' ? '#8fd6b4' : '#e7e7e7', padding: '2px 8px', borderRadius: 6}}>{row.recomendacion}</span></td>
             </tr>
           ))}
+          {/* Fila de suma total */}
+          <tr style={{ fontWeight: 'bold', background: '#f6f6f6' }}>
+            <td colSpan={6} style={{ textAlign: 'right' }}>Total inversión:</td>
+            <td colSpan={2} style={{ textAlign: 'left' }}>
+              ${portfolio.reduce((acc, row) => acc + (Number(row.inversion) || 0), 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+            </td>
+          </tr>
         </tbody>
       </table>
     </div>

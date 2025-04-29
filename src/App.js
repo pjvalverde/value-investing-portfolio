@@ -57,19 +57,59 @@ function App() {
     setAnalysisLoading(true);
     setShowAnalysis(true);
     setAnalysis('');
+    setComparativeData([]);
+    setHistoricalData([]);
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
       const res = await fetch(`${BASE_URL}/justification`);
       if (!res.ok) throw new Error('No se pudo obtener el análisis detallado');
       const data = await res.json();
-      setAnalysis(data.html);
+      setAnalysis(data.analysis || data.html || '');
+      if (data.metrics && Array.isArray(data.metrics)) {
+        // Adaptar para ComparativeTable
+        setComparativeData(
+          data.metrics.map(m => ({
+            company: m.ticker,
+            ROE: m.ROE ?? '-',
+            'P/E': m.PE ?? '-',
+            'Margen de Beneficio': m.margen_beneficio ?? '-',
+            'Ratio de Deuda': m.ratio_deuda ?? '-',
+            'Crecimiento de FCF': m.crecimiento_fcf ?? '-',
+            'Moat Cualitativo': m.moat ?? '-'
+          }))
+        );
+      }
+      // Obtener históricos
+      if (data.metrics && data.metrics.length > 0) {
+        const tickers = data.metrics.map(m => m.ticker);
+        const resHist = await fetch(`${BASE_URL}/historical_prices`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tickers })
+        });
+        if (resHist.ok) {
+          const histData = await resHist.json();
+          // Formatear para HistoricalChart
+          const allDates = new Set();
+          Object.values(histData.historical).forEach(arr => arr.forEach(d => allDates.add(d.date)));
+          const sortedDates = Array.from(allDates).sort();
+          const chartData = sortedDates.map(date => {
+            const row = { date };
+            for (const ticker of tickers) {
+              const found = (histData.historical[ticker] || []).find(d => d.date === date);
+              row[ticker] = found ? found.close : null;
+            }
+            return row;
+          });
+          setHistoricalData(chartData);
+        }
+      }
     } catch (e) {
       setAnalysis(`<span style='color:red'>${e.message}</span>`);
     } finally {
       setAnalysisLoading(false);
     }
   };
-
   return (
     <div className="App" style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
       <h1>Value Investing Portfolio App</h1>
@@ -88,16 +128,18 @@ function App() {
         </>
       )}
       {showAnalysis && (
-        <div className="card" style={{ marginTop: 24, padding: 24, background: '#fffbe8' }}>
-          <h2>Análisis Detallado del Portafolio</h2>
-          <div dangerouslySetInnerHTML={{ __html: analysis }} />
-        </div>
-      )}
-      {historicalData.length > 0 && (
-        <HistoricalChart data={historicalData} title="Evolución Histórica del Portfolio" companies={["CompanyA","CompanyB"]} />
-      )}
-      {comparativeData.length > 0 && (
-        <ComparativeTable data={comparativeData} metrics={["ROE","P/E","Margen de Beneficio","Ratio de Deuda","Crecimiento de FCF","Moat Cualitativo"]} />
+        <>
+          <div className="card" style={{ marginTop: 24, padding: 24, background: '#fffbe8' }}>
+            <h2>Análisis Detallado del Portafolio</h2>
+            <div dangerouslySetInnerHTML={{ __html: analysis }} />
+          </div>
+          {historicalData.length > 0 && (
+            <HistoricalChart data={historicalData} title="Evolución Histórica del Portfolio" companies={comparativeData.map(d => d.company)} />
+          )}
+          {comparativeData.length > 0 && (
+            <ComparativeTable data={comparativeData} metrics={["ROE","P/E","Margen de Beneficio","Ratio de Deuda","Crecimiento de FCF","Moat Cualitativo"]} />
+          )}
+        </>
       )}
       <div style={{ marginTop: 32 }}>
         <h2>Justificación y Metodología</h2>
