@@ -1,5 +1,6 @@
 import './App.css';
 import { useState } from 'react';
+import PortfolioForm from './components/PortfolioForm';
 import PortfolioCharts from './components/PortfolioCharts';
 import MethodologyDoc from './components/MethodologyDoc';
 import HistoricalChart from './components/HistoricalChart';
@@ -9,27 +10,29 @@ function App() {
   const [portfolio, setPortfolio] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  // Simulación de datos históricos y comparativos
   const [historicalData, setHistoricalData] = useState([]);
   const [comparativeData, setComparativeData] = useState([]);
 
-  const fetchPortfolio = async () => {
+  const fetchPortfolio = async (formData) => {
     setLoading(true);
     setError('');
     try {
-      // Generar portafolio (POST)
-      // Construye la URL base correctamente (sin barra al final)
       const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
-      // Generar portafolio (POST)
-      await fetch(`${BASE_URL}/generate_portfolio`, { method: 'POST' });
-      // Esperar unos segundos a que el backend lo genere
-      await new Promise(res => setTimeout(res, 3000));
+      // Enviar datos del formulario al backend
+      const resGen = await fetch(`${BASE_URL}/generate_portfolio`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!resGen.ok) throw new Error('No se pudo generar el portafolio');
+      // Esperar unos segundos a que el backend lo procese
+      await new Promise(res => setTimeout(res, 2000));
       // Obtener portafolio (GET)
       const res = await fetch(`${BASE_URL}/portfolio`, { method: 'GET' });
       if (!res.ok) throw new Error('No se pudo obtener el portafolio');
       const data = await res.json();
       setPortfolio(data);
-      // Simula datos históricos y comparativos (reemplazar por fetch real)
+      // (Opcional) Simula datos históricos y comparativos
       setHistoricalData([
         { date: '2022-01', value: 100, CompanyA: 100, CompanyB: 100 },
         { date: '2022-06', value: 110, CompanyA: 115, CompanyB: 108 },
@@ -51,9 +54,7 @@ function App() {
   return (
     <div className="App" style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
       <h1>Value Investing Portfolio App</h1>
-      <button onClick={fetchPortfolio} disabled={loading} style={{ marginBottom: 16 }}>
-        {loading ? 'Generando...' : 'Generar mi Portfolio Ideal'}
-      </button>
+      <PortfolioForm onSubmit={fetchPortfolio} loading={loading} />
       {error && <div style={{ color: 'red' }}>{error}</div>}
       {portfolio.length > 0 && <PortfolioCharts portfolio={portfolio} />}
       {/* Visualización histórica */}
