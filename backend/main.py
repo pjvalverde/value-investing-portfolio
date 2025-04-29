@@ -29,32 +29,43 @@ def generate_portfolio():
 
 # Endpoint para obtener el portafolio generado (CSV a JSON)
 @app.get("/portfolio")
-def get_portfolio():
+def get_portfolio(date: str = None):
     """
-    Genera el portafolio dinámicamente usando OpenBB y Deepseek (simulado),
-    sin depender de archivos CSV ni de archivos en disco.
+    Devuelve el portafolio con precios reales desde Alpha Vantage.
+    - Si se pasa ?date=YYYY-MM-DD, devuelve el precio de cierre de esa fecha para cada ticker.
+    - Si no se pasa fecha, devuelve el último precio disponible.
     """
-    OPENBB_TOKEN = os.getenv("OPENBB_TOKEN")
-    DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
-
-    if not OPENBB_TOKEN:
-        return JSONResponse(content={"error": "OPENBB_TOKEN no configurado en variables de entorno."}, status_code=500)
-
-    try:
-        from openbb import obb
-        obb.account.login(pat=OPENBB_TOKEN)
-        data = obb.indices.constituents("SP500")
-        tickers = list(data["Symbol"])[:10] if "Symbol" in data else []
-    except Exception as e:
-        return JSONResponse(content={"error": f"Error consultando OpenBB: {str(e)}"}, status_code=500)
-
+    import requests
+    ALPHAVANTAGE_API_KEY = os.getenv("ALPHAVANTAGE_API_KEY")
+    tickers = ["AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "NVDA", "JPM", "V", "UNH"]
     portafolio = []
     for ticker in tickers:
-        resultado = {"ticker": ticker, "score": 0.8, "recomendacion": "BUY"}
+        if date:
+            url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol={ticker}&apikey={ALPHAVANTAGE_API_KEY}"
+        else:
+            url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={ALPHAVANTAGE_API_KEY}"
+        try:
+            resp = requests.get(url)
+            data = resp.json()
+            if date:
+                ts = data.get("Time Series (Daily)", {})
+                day_data = ts.get(date)
+                price = day_data["4. close"] if day_data else None
+            else:
+                price = data.get("Global Quote", {}).get("05. price")
+            resultado = {
+                "ticker": ticker,
+                "price": price,
+                "score": 0.8,
+                "recomendacion": "BUY"
+            }
+        except Exception as e:
+            resultado = {
+                "ticker": ticker,
+                "error": str(e)
+            }
         portafolio.append(resultado)
-
     return JSONResponse(content=portafolio)
-
 
 # Endpoint para obtener la justificación (MD a HTML)
 @app.get("/justification")
