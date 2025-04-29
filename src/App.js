@@ -7,7 +7,6 @@ import ComparativeTable from './components/ComparativeTable';
 
 function App() {
   const [portfolio, setPortfolio] = useState([]);
-  const [justification, setJustification] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   // Simulación de datos históricos y comparativos
@@ -19,16 +18,19 @@ function App() {
     setError('');
     try {
       // Generar portafolio (POST)
-      await fetch('http://localhost:8000/generate_portfolio', { method: 'POST' });
+      // Construye la URL base correctamente (sin barra al final)
+      const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
+      // Generar portafolio (POST)
+      await fetch(`${BASE_URL}/generate_portfolio`, { method: 'POST' });
       // Esperar unos segundos a que el backend lo genere
       await new Promise(res => setTimeout(res, 3000));
-      // Obtener portafolio
-      const res = await fetch('http://localhost:8000/portfolio');
+      // Obtener portafolio (GET)
+      const res = await fetch(`${BASE_URL}/portfolio`, { method: 'GET' });
       if (!res.ok) throw new Error('No se pudo obtener el portafolio');
       const data = await res.json();
       setPortfolio(data);
       // Obtener justificación
-      const resJ = await fetch('http://localhost:8000/justification');
+      const resJ = await fetch(`${BASE_URL}/justification`, { method: 'GET' });
       if (resJ.ok) {
         const dataJ = await resJ.json();
         setJustification(dataJ.html);
