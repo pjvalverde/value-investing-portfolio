@@ -29,12 +29,6 @@ function App() {
       if (!res.ok) throw new Error('No se pudo obtener el portafolio');
       const data = await res.json();
       setPortfolio(data);
-      // Obtener justificación
-      const resJ = await fetch(`${BASE_URL}/justification`, { method: 'GET' });
-      if (resJ.ok) {
-        const dataJ = await resJ.json();
-        setJustification(dataJ.html);
-      }
       // Simula datos históricos y comparativos (reemplazar por fetch real)
       setHistoricalData([
         { date: '2022-01', value: 100, CompanyA: 100, CompanyB: 100 },
