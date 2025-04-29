@@ -1,24 +1,40 @@
-import pandas as pd
 import os
+import traceback
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PORTFOLIO_PATH = os.path.join(BASE_DIR, "portfolio_final.csv")
+# --- Paso 1: Obtener tickers dinámicamente con OpenBB (simulado) ---
+def obtener_tickers_openbb():
+    print("Obteniendo tickers desde OpenBB...")
+    # Aquí iría la llamada real a la API de OpenBB
+    # Por ejemplo: tickers = openbb.stocks.index.constituents('S&P 500')
+    tickers = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA']  # Simulación
+    print(f"Tickers obtenidos: {tickers}")
+    return tickers
 
-try:
-    if os.path.exists(PORTFOLIO_PATH):
-        print("Cargando portafolio generado...")
-        df = pd.read_csv(PORTFOLIO_PATH)
-        print("Primeras filas del portafolio:")
-        print(df.head())
-        # Puedes agregar aquí lógica adicional para análisis, visualizaciones, etc.
-    else:
-        print("Error: No se encontró el archivo 'portfolio_final.csv' en la carpeta docs. Genera el portafolio primero usando la app de OpenBB o tu flujo de datos.")
-except Exception as e:
-    print(f"Error al cargar el portafolio: {str(e)}")
+# --- Paso 2: Analizar cada ticker con Deepseek (simulado) ---
+def analizar_con_deepseek(ticker):
+    print(f"Analizando {ticker} con Deepseek...")
+    # Aquí iría la llamada real a la API de Deepseek
+    # Por ejemplo: resultado = deepseek.analyze(ticker)
+    resultado = {'ticker': ticker, 'score': 0.8, 'recomendacion': 'BUY'}  # Simulación
+    print(f"Resultado para {ticker}: {resultado}")
+    return resultado
 
-# Función para extraer métricas adicionales de los datos completos
-def extraer_metricas_adicionales(ticker, datos_completos):
-    for datos in datos_completos:
+# --- Paso 3: Construir portafolio ---
+def generar_portafolio():
+    try:
+        tickers = obtener_tickers_openbb()
+        portafolio = []
+        for ticker in tickers:
+            analisis = analizar_con_deepseek(ticker)
+            portafolio.append(analisis)
+        print("\nPortafolio generado dinámicamente:")
+        for item in portafolio:
+            print(item)
+        # Aquí puedes devolver el portafolio como JSON, DataFrame, etc.
+    except Exception as e:
+        print("ERROR FATAL EN generar_portafolio")
+        print(str(e))
+        traceback.print_exc()
         if datos.get("ticker") == ticker and "error" not in datos:
             try:
                 # Extraer datos históricos para análisis de tendencias
