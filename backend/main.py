@@ -20,11 +20,10 @@ app.add_middleware(
 DATA_DIR = os.path.join(os.path.dirname(__file__), '..', 'docs')
 RESULTS_DIR = os.path.join(DATA_DIR, 'resultados')
 
-# Endpoint para generar el portafolio (ejecuta el script Python)
+# Endpoint para generar el portafolio
 @app.post("/generate_portfolio")
 def generate_portfolio():
     return {"status": "Portfolio generation not needed, done dynamically."}
-
 
 # Endpoint para obtener el portafolio generado (CSV a JSON)
 import os
