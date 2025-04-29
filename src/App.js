@@ -8,6 +8,14 @@ import HistoricalChart from './components/HistoricalChart';
 import ComparativeTable from './components/ComparativeTable';
 
 function App() {
+  const [portfolio, setPortfolio] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [historicalData, setHistoricalData] = useState([]);
+  const [comparativeData, setComparativeData] = useState([]);
+  const [showAnalysis, setShowAnalysis] = useState(false);
+  const [analysis, setAnalysis] = useState('');
+  const [analysisLoading, setAnalysisLoading] = useState(false);
   const [warnings, setWarnings] = useState([]);
 
   const fetchPortfolio = async (formData) => {
