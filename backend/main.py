@@ -77,11 +77,6 @@ def get_visualization(img_name: str):
     if not os.path.exists(img_path):
         return JSONResponse(content={"error": "Visualization not found"}, status_code=404)
     return FileResponse(img_path)
-@app.get("/env")
-def get_env():
-    import os
-    return {k: v for k, v in os.environ.items() if k in ["OPENBB_TOKEN", "DEEPSEEK_API_KEY"]}
-
 
 @app.get("/")
 def root():
