@@ -89,17 +89,102 @@ function App() {
       if (!res.ok) throw new Error('No se pudo obtener el portafolio');
       const data = await res.json();
       setPortfolio(data);
-      setHistoricalData([
-        { date: '2022-01', value: 100, CompanyA: 100, CompanyB: 100 },
-        { date: '2022-06', value: 110, CompanyA: 115, CompanyB: 108 },
-        { date: '2023-01', value: 120, CompanyA: 125, CompanyB: 119 },
-        { date: '2023-06', value: 130, CompanyA: 140, CompanyB: 127 },
-        { date: '2024-01', value: 145, CompanyA: 150, CompanyB: 140 }
-      ]);
-      setComparativeData([
-        { company: 'CompanyA', ROE: 18, 'P/E': 14, 'Margen de Beneficio': '22%', 'Ratio de Deuda': '0.3', 'Crecimiento de FCF': '9%', 'Moat Cualitativo': 'Alto' },
-        { company: 'CompanyB', ROE: 15, 'P/E': 17, 'Margen de Beneficio': '18%', 'Ratio de Deuda': '0.4', 'Crecimiento de FCF': '7%', 'Moat Cualitativo': 'Medio' }
-      ]);
+      
+      // Obtener datos históricos en tiempo real
+      try {
+        // Seleccionar hasta 3 acciones del portfolio para mostrar datos históricos
+        const stocksForHistory = data.filter(item => item.tipo === 'Acción' || item.tipo === 'ETF').slice(0, 3);
+        const tickers = stocksForHistory.map(item => item.ticker);
+        
+        // Obtener datos históricos para cada ticker
+        const historyPromises = tickers.map(ticker => 
+          fetch(`${BASE_URL}/historical_prices?ticker=${ticker}&period=1year`)
+            .then(res => res.ok ? res.json() : null)
+            .catch(err => {
+              console.error(`Error al obtener datos históricos para ${ticker}:`, err);
+              return null;
+            })
+        );
+        
+        const historicalResults = await Promise.all(historyPromises);
+        
+        // Procesar los resultados para el formato que espera el gráfico
+        const processedData = [];
+        const tickerData = {};
+        
+        // Inicializar tickerData con arrays vacíos para cada ticker
+        tickers.forEach(ticker => {
+          tickerData[ticker] = [];
+        });
+        
+        // Llenar los arrays con los datos históricos
+        historicalResults.forEach((result, index) => {
+          if (result && result.length > 0) {
+            const ticker = tickers[index];
+            tickerData[ticker] = result;
+          }
+        });
+        
+        // Encontrar todas las fechas únicas
+        const allDates = new Set();
+        Object.values(tickerData).forEach(data => {
+          data.forEach(item => allDates.add(item.date));
+        });
+        
+        // Ordenar las fechas
+        const sortedDates = Array.from(allDates).sort();
+        
+        // Crear el array final de datos históricos
+        sortedDates.forEach(date => {
+          const dataPoint = { date };
+          
+          // Agregar el valor para cada ticker
+          tickers.forEach(ticker => {
+            const point = tickerData[ticker].find(p => p.date === date);
+            if (point) {
+              dataPoint[ticker] = point.price;
+            }
+          });
+          
+          processedData.push(dataPoint);
+        });
+        
+        setHistoricalData(processedData);
+      } catch (historyError) {
+        console.error('Error al procesar datos históricos:', historyError);
+        // Usar datos estáticos como respaldo si hay un error
+        setHistoricalData([
+          { date: '2022-01', value: 100, CompanyA: 100, CompanyB: 100 },
+          { date: '2022-06', value: 110, CompanyA: 115, CompanyB: 108 },
+          { date: '2023-01', value: 120, CompanyA: 125, CompanyB: 119 },
+          { date: '2023-06', value: 130, CompanyA: 140, CompanyB: 127 },
+          { date: '2024-01', value: 145, CompanyA: 150, CompanyB: 140 }
+        ]);
+      }
+      
+      // Obtener datos comparativos en tiempo real
+      try {
+        // Seleccionar hasta 3 acciones del portfolio para comparar
+        const stocksToCompare = data.filter(item => item.tipo === 'Acción').slice(0, 3);
+        if (stocksToCompare.length > 0) {
+          const tickersToCompare = stocksToCompare.map(item => item.ticker).join(',');
+          const comparativeRes = await fetch(`${BASE_URL}/comparative_data?tickers=${tickersToCompare}`);
+          
+          if (comparativeRes.ok) {
+            const comparativeData = await comparativeRes.json();
+            setComparativeData(comparativeData);
+          } else {
+            throw new Error('No se pudieron obtener datos comparativos');
+          }
+        }
+      } catch (compareError) {
+        console.error('Error al obtener datos comparativos:', compareError);
+        // Usar datos estáticos como respaldo si hay un error
+        setComparativeData([
+          { company: 'CompanyA', ROE: 18, 'P/E': 14, 'Margen de Beneficio': '22%', 'Ratio de Deuda': '0.3', 'Crecimiento de FCF': '9%', 'Moat Cualitativo': 'Alto' },
+          { company: 'CompanyB', ROE: 15, 'P/E': 17, 'Margen de Beneficio': '18%', 'Ratio de Deuda': '0.4', 'Crecimiento de FCF': '7%', 'Moat Cualitativo': 'Medio' }
+        ]);
+      }
     } catch (e) {
       setError(e.message);
     } finally {
