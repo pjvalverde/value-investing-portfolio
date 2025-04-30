@@ -43,7 +43,27 @@ function App() {
       if (action.margen_beneficio !== undefined && action.margen_beneficio !== null) metrics.push({ name: 'Margen', value: action.margen_beneficio });
       if (action.ratio_deuda !== undefined && action.ratio_deuda !== null) metrics.push({ name: 'Deuda', value: action.ratio_deuda });
       if (action.crecimiento_fcf !== undefined && action.crecimiento_fcf !== null) metrics.push({ name: 'FCF', value: action.crecimiento_fcf });
+      if (action.moat !== undefined && action.moat !== null) metrics.push({ name: 'Moat', value: action.moat });
       setSelectedActionMetrics(metrics);
+      
+      // Actualizar precios en tiempo real si es necesario
+      if (!action.price || action.price === 'NaN') {
+        try {
+          const priceRes = await fetch(`${BASE_URL}/real_time_price?ticker=${action.ticker}`);
+          if (priceRes.ok) {
+            const priceData = await priceRes.json();
+            if (priceData.price) {
+              // Actualizar el precio en el portfolio local
+              const updatedPortfolio = portfolio.map(item => 
+                item.ticker === action.ticker ? {...item, price: priceData.price} : item
+              );
+              setPortfolio(updatedPortfolio);
+            }
+          }
+        } catch (priceErr) {
+          console.error('Error al obtener precio en tiempo real:', priceErr);
+        }
+      }
     } catch (e) {
       setSelectedActionAnalysis(`<span style='color:red'>${e.message}</span>`);
     }
@@ -161,7 +181,7 @@ function App() {
       {portfolio.length > 0 && (
         <>
           <PortfolioCharts portfolio={portfolio} />
-          <PortfolioTable portfolio={portfolio} />
+          <PortfolioTable portfolio={portfolio} onShowAnalysis={handleShowActionAnalysis} />
           {/* Botones de acciones */}
           <div style={{ display: 'flex', gap: 10, margin: '16px 0', flexWrap: 'wrap' }}>
             {portfolio.filter(a => a.tipo === 'Acción').map((a) => (
