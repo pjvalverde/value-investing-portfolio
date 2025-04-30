@@ -182,18 +182,7 @@ function App() {
         <>
           <PortfolioCharts portfolio={portfolio} />
           <PortfolioTable portfolio={portfolio} onShowAnalysis={handleShowActionAnalysis} />
-          {/* Botones de acciones */}
-          <div style={{ display: 'flex', gap: 10, margin: '16px 0', flexWrap: 'wrap' }}>
-            {portfolio.filter(a => a.tipo === 'Acción').map((a) => (
-              <button
-                key={a.ticker}
-                style={{ background: '#e3eafe', color: '#2d4373', border: '1px solid #b5c7fa', borderRadius: 8, padding: '8px 18px', fontWeight: 600, cursor: 'pointer' }}
-                onClick={() => handleShowActionAnalysis(a)}
-              >
-                {a.ticker}
-              </button>
-            ))}
-          </div>
+          {/* Eliminados los botones de acciones */}
           {/* Modal de análisis individual */}
           <ActionAnalysisModal
             open={!!selectedAction}
@@ -224,9 +213,6 @@ function App() {
               }}
             >
               Armar otro portfolio
-            </button>
-            <button onClick={handleShowAnalysis} disabled={analysisLoading} style={{ background: '#3b5998', color: 'white', padding: '8px 20px', borderRadius: 6 }}>
-              {analysisLoading ? 'Generando análisis...' : 'Ver análisis detallado'}
             </button>
           </div>
         </>

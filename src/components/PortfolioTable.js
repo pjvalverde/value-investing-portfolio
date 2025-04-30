@@ -18,22 +18,13 @@ const PortfolioTable = ({ portfolio = [], onShowAnalysis }) => {
             <th>Cantidad</th>
             <th>Inversión total</th>
             <th>Recomendación</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {portfolio.map(row => (
-            <tr 
-              key={row.ticker} 
-              onClick={() => onShowAnalysis(row)}
-              style={{ 
-                cursor: 'pointer',
-                transition: 'background-color 0.2s',
-                ':hover': { backgroundColor: '#f5f5f5' }
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f5f5f5'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = ''}
-            >
-              <td><strong>{row.ticker}</strong></td>
+            <tr key={row.ticker}>
+              <td>{row.ticker}</td>
               <td>{row.sector}</td>
               <td>{row.peso}</td>
               <td>{row.tipo}</td>
@@ -51,12 +42,27 @@ const PortfolioTable = ({ portfolio = [], onShowAnalysis }) => {
                   {row.recomendacion}
                 </span>
               </td>
+              <td>
+                <button 
+                  onClick={() => onShowAnalysis(row)} 
+                  style={{
+                    background: '#3b5998',
+                    color: 'white',
+                    border: 'none',
+                    padding: '4px 12px',
+                    borderRadius: 4,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Ver análisis
+                </button>
+              </td>
             </tr>
           ))}
           {/* Fila de suma total */}
           <tr style={{ fontWeight: 'bold', background: '#f6f6f6' }}>
             <td colSpan={6} style={{ textAlign: 'right' }}>Total inversión:</td>
-            <td colSpan={2} style={{ textAlign: 'left' }}>
+            <td colSpan={3} style={{ textAlign: 'left' }}>
               ${portfolio.reduce((acc, row) => acc + (Number(row.inversion) || 0), 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
             </td>
           </tr>
