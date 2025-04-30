@@ -203,7 +203,28 @@ function App() {
             metrics={selectedActionMetrics}
           />
           <div style={{ margin: '24px 0', display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
-            <button onClick={() => fetchPortfolio()} disabled={loading}>Regenerar portafolio</button>
+            <button 
+              onClick={() => {
+                // Reiniciar el formulario para crear un nuevo portfolio
+                setPortfolio([]);
+                setShowAnalysis(false);
+                setAnalysis('');
+                setHistoricalData([]);
+                setComparativeData([]);
+              }} 
+              disabled={loading}
+              style={{
+                background: '#4CAF50',
+                color: 'white',
+                padding: '8px 16px',
+                borderRadius: '4px',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.7 : 1
+              }}
+            >
+              Armar otro portfolio
+            </button>
             <button onClick={handleShowAnalysis} disabled={analysisLoading} style={{ background: '#3b5998', color: 'white', padding: '8px 20px', borderRadius: 6 }}>
               {analysisLoading ? 'Generando análisis...' : 'Ver análisis detallado'}
             </button>

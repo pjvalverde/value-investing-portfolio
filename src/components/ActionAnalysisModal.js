@@ -59,8 +59,26 @@ export default function ActionAnalysisModal({ open, onClose, action, analysis, m
         overflowY: 'auto',
         boxShadow: '0 4px 24px #0001' 
       }}>
-        <button onClick={onClose} style={{ float: 'right', background: 'none', border: 'none', fontSize: 20, cursor: 'pointer' }}>&times;</button>
-        <h2 style={{ marginTop: 0 }}>{action} - Análisis Detallado</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2 style={{ margin: 0 }}>{action} - Análisis Detallado</h2>
+          <button 
+            onClick={onClose} 
+            style={{ 
+              background: '#f44336', 
+              color: 'white', 
+              border: 'none', 
+              borderRadius: '4px', 
+              padding: '8px 16px', 
+              fontSize: 16, 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
+            }}
+          >
+            Cerrar <span style={{ marginLeft: 5, fontSize: 20 }}>&times;</span>
+          </button>
+        </div>
         
         {/* Tabs de navegación */}
         <div style={{ display: 'flex', borderBottom: '1px solid #ddd', marginBottom: 20 }}>
