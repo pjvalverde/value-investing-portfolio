@@ -21,16 +21,7 @@ const PortfolioCharts = ({ portfolio, portfolioDistribution }) => {
   const pieData = Object.entries(sectorDistribution).map(([name, value]) => ({ name, value }));
   const sectorData = [...pieData].sort((a, b) => b.value - a.value);
 
-  // Barras: distribución por mercado
-  const marketDistribution = {};
-  portfolio.forEach(item => {
-    const mercado = item.Market || item.mercado;
-    const peso = parseFloat(item.Allocation || item.peso || 1);
-    if (mercado) {
-      marketDistribution[mercado] = (marketDistribution[mercado] || 0) + peso;
-    }
-  });
-  const marketData = Object.entries(marketDistribution).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
+  // Ya no usamos la distribución por mercado
 
   return (
     <div>
@@ -75,22 +66,7 @@ const PortfolioCharts = ({ portfolio, portfolioDistribution }) => {
         </ResponsiveContainer>
       </div>
 
-      <div className="card">
-        <div className="section-title">Distribución por Mercado (Peso %)</div>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart
-            data={marketData}
-            margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip formatter={(value) => `${value}%`} />
-            <Legend />
-            <Bar dataKey="value" name="Peso (%)" fill="#68b7a0" />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Se eliminó la visualización de Distribución por Mercado que no era útil para el inversor */}
 
       <div className="card">
         <div className="section-title">Principios de Value Investing Aplicados</div>
