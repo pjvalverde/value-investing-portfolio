@@ -7,6 +7,7 @@ import MethodologyDoc from './components/MethodologyDoc';
 import HistoricalChart from './components/HistoricalChart';
 import ActionAnalysisModal from './components/ActionAnalysisModal';
 import ComparativeTable from './components/ComparativeTable';
+import PortfolioBuilder from './components/builder/PortfolioBuilder';
 
 function App() {
   const [selectedAction, setSelectedAction] = useState(null);
@@ -19,6 +20,7 @@ function App() {
   const [warnings, setWarnings] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [activeView, setActiveView] = useState('portfolio'); // 'portfolio' o 'builder'
   const [analysis, setAnalysis] = useState('');
   const [analysisLoading, setAnalysisLoading] = useState(false);
   const [comparativeData, setComparativeData] = useState([]);
@@ -253,73 +255,136 @@ function App() {
   return (
     <div className="App" style={{ maxWidth: 1200, margin: '0 auto', padding: 24 }}>
       <h1>Value Investing Portfolio App</h1>
-      <PortfolioForm onSubmit={fetchPortfolio} loading={loading} />
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-      {warnings.length > 0 && (
-        <div style={{ background: '#fff3cd', color: '#856404', padding: 12, borderRadius: 6, marginBottom: 12, border: '1px solid #ffeeba' }}>
-          <strong>Advertencia:</strong>
-          <ul style={{ margin: 0, paddingLeft: 20 }}>
-            {warnings.map((w, i) => <li key={i}>{w}</li>)}
-          </ul>
-        </div>
-      )}
-      {portfolio.length > 0 && (
-        <>
-          <PortfolioCharts portfolio={portfolio} />
-          <PortfolioTable portfolio={portfolio} onShowAnalysis={handleShowActionAnalysis} />
-          {/* Eliminados los botones de acciones */}
-          {/* Modal de análisis individual */}
-          <ActionAnalysisModal
-            open={!!selectedAction}
-            onClose={() => setSelectedAction(null)}
-            action={selectedAction?.ticker}
-            analysis={selectedActionAnalysis}
-            metrics={selectedActionMetrics}
-          />
-          <div style={{ margin: '24px 0', display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
-            <button 
-              onClick={() => {
-                // Reiniciar el formulario para crear un nuevo portfolio
-                setPortfolio([]);
-                setShowAnalysis(false);
-                setAnalysis('');
-                setHistoricalData([]);
-                setComparativeData([]);
-              }} 
-              disabled={loading}
-              style={{
-                background: '#4CAF50',
-                color: 'white',
-                padding: '8px 16px',
-                borderRadius: '4px',
-                border: 'none',
-                cursor: loading ? 'not-allowed' : 'pointer',
-                opacity: loading ? 0.7 : 1
-              }}
-            >
-              Armar otro portfolio
-            </button>
-          </div>
-        </>
-      )}
-      {showAnalysis && (
-        <>
-          <div className="card" style={{ marginTop: 24, padding: 24, background: '#fffbe8' }}>
-            <h2>Análisis Detallado del Portafolio</h2>
-            <div dangerouslySetInnerHTML={{ __html: analysis }} />
-          </div>
-          {historicalData.length > 0 && (
-            <HistoricalChart data={historicalData} title="Evolución Histórica del Portfolio" companies={comparativeData.map(d => d.company)} />
-          )}
-          {comparativeData.length > 0 && (
-            <ComparativeTable data={comparativeData} metrics={["ROE","P/E","Margen de Beneficio","Ratio de Deuda","Crecimiento de FCF","Moat Cualitativo"]} />
-          )}
-        </>
-      )}
-      <div style={{ marginTop: 32 }}>
-        <h2>Justificación y Metodología</h2>
-        <MethodologyDoc highlightMetrics={["ROE","P/E"]} />
+      
+      {/* Navegación */}
+      <div className="app-navigation" style={{
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '24px',
+        borderBottom: '1px solid #e0e0e0',
+        paddingBottom: '12px'
+      }}>
+        <button 
+          onClick={() => setActiveView('portfolio')}
+          style={{
+            padding: '10px 20px',
+            margin: '0 10px',
+            border: 'none',
+            borderRadius: '4px',
+            background: activeView === 'portfolio' ? '#3498db' : '#f0f0f0',
+            color: activeView === 'portfolio' ? 'white' : '#333',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}
+        >
+          Portfolio Tradicional
+        </button>
+        <button 
+          onClick={() => setActiveView('builder')}
+          style={{
+            padding: '10px 20px',
+            margin: '0 10px',
+            border: 'none',
+            borderRadius: '4px',
+            background: activeView === 'builder' ? '#3498db' : '#f0f0f0',
+            color: activeView === 'builder' ? 'white' : '#333',
+            fontWeight: 'bold',
+            cursor: 'pointer'
+          }}
+        >
+          Portfolio Builder
+        </button>
       </div>
+      
+      {/* Vista de Portfolio Tradicional */}
+      {activeView === 'portfolio' && (
+        <>
+          <PortfolioForm onSubmit={fetchPortfolio} loading={loading} />
+          {error && <div style={{ color: 'red' }}>{error}</div>}
+          {warnings.length > 0 && (
+            <div style={{ background: '#fff3cd', color: '#856404', padding: 12, borderRadius: 6, marginBottom: 12, border: '1px solid #ffeeba' }}>
+              <strong>Advertencia:</strong>
+              <ul style={{ margin: 0, paddingLeft: 20 }}>
+                {warnings.map((w, i) => <li key={i}>{w}</li>)}
+              </ul>
+            </div>
+          )}
+          {portfolio.length > 0 && (
+            <>
+              <PortfolioCharts portfolio={portfolio} />
+              <PortfolioTable portfolio={portfolio} onShowAnalysis={handleShowActionAnalysis} />
+              {/* Eliminados los botones de acciones */}
+              {/* Modal de análisis individual */}
+              <ActionAnalysisModal
+                open={!!selectedAction}
+                onClose={() => setSelectedAction(null)}
+                action={selectedAction?.ticker}
+                analysis={selectedActionAnalysis}
+                metrics={selectedActionMetrics}
+              />
+              <div style={{ margin: '24px 0', display: 'flex', justifyContent: 'flex-end', gap: 16 }}>
+                <button 
+                  onClick={() => {
+                    // Reiniciar el formulario para crear un nuevo portfolio
+                    setPortfolio([]);
+                    setShowAnalysis(false);
+                    setAnalysis('');
+                    setHistoricalData([]);
+                    setComparativeData([]);
+                  }} 
+                  disabled={loading}
+                  style={{
+                    background: '#4CAF50',
+                    color: 'white',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.7 : 1
+                  }}
+                >
+                  Armar otro portfolio
+                </button>
+              </div>
+            </>
+          )}
+          {showAnalysis && (
+            <div style={{ marginTop: 24 }}>
+              <h2>Análisis Detallado del Portfolio</h2>
+              {analysisLoading ? (
+                <div>Cargando análisis detallado...</div>
+              ) : (
+                <>
+                  <div dangerouslySetInnerHTML={{ __html: analysis }} />
+                  
+                  {historicalData.length > 0 && (
+                    <div style={{ marginTop: 24 }}>
+                      <h3>Rendimiento Histórico</h3>
+                      <HistoricalChart data={historicalData} />
+                    </div>
+                  )}
+                  
+                  {comparativeData.length > 0 && (
+                    <div style={{ marginTop: 24 }}>
+                      <h3>Análisis Comparativo</h3>
+                      <ComparativeTable data={comparativeData} />
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+          
+          <div style={{ marginTop: 48, borderTop: '1px solid #eee', paddingTop: 24 }}>
+            <MethodologyDoc />
+          </div>
+        </>
+      )}
+      
+      {/* Vista de Portfolio Builder */}
+      {activeView === 'builder' && (
+        <PortfolioBuilder />
+      )}
     </div>
   );
 }
