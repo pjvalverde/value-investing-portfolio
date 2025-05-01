@@ -3,13 +3,21 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import './PortfolioResults.css';
 
 const PortfolioResults = ({ portfolio, amount }) => {
-  const { portfolio: positions, metrics } = portfolio;
+  // Extraer datos del portfolio optimizado
+  const { allocation, metrics } = portfolio;
+  
+  // Combinar todas las posiciones de diferentes categorías en un solo array
+  const positions = [
+    ...allocation.value.map(item => ({ ...item, bucket: 'value' })),
+    ...allocation.growth.map(item => ({ ...item, bucket: 'growth' })),
+    ...allocation.bonds.map(item => ({ ...item, bucket: 'bonds' }))
+  ];
   
   // Agrupar por bucket (tipo de activo)
   const bucketData = positions.reduce((acc, position) => {
     const bucket = position.bucket || 'otros';
     if (!acc[bucket]) acc[bucket] = 0;
-    acc[bucket] += position.usd;
+    acc[bucket] += position.amount;
     return acc;
   }, {});
   
@@ -37,7 +45,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
   };
   
   // Calcular el total invertido
-  const totalInvested = positions.reduce((sum, pos) => sum + pos.usd, 0);
+  const totalInvested = positions.reduce((sum, pos) => sum + pos.amount, 0);
   const cash = amount - totalInvested;
   
   return (
@@ -118,7 +126,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
                   <td>{position.bucket}</td>
                   <td>{position.shares}</td>
                   <td>{formatMoney(position.price)}</td>
-                  <td>{formatMoney(position.usd)}</td>
+                  <td>{formatMoney(position.amount)}</td>
                 </tr>
               ))}
             </tbody>
