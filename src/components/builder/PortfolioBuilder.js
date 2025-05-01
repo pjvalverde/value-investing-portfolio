@@ -44,8 +44,12 @@ const PortfolioBuilder = () => {
     setError('');
     
     try {
-      // Usar la URL del backend en Railway
-      const BASE_URL = 'https://value-investing-backend-production.up.railway.app';
+      // Intentar conectarse a Railway y si falla, usar el backend local
+      let BASE_URL = 'https://value-investing-backend-production.up.railway.app';
+      
+      // Opcionalmente, para desarrollo local, puedes descomentar esta línea
+      // BASE_URL = 'http://localhost:8000';
+
       const response = await fetch(`${BASE_URL}/api/portfolio/optimize`, {
         method: 'POST',
         headers: {
