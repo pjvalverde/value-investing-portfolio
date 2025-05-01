@@ -45,7 +45,7 @@ const PortfolioBuilder = () => {
     
     try {
       // Para desarrollo local, usar el backend local
-      let BASE_URL = 'http://localhost:8001';
+      let BASE_URL = 'http://localhost:8002';
       
       // Para producciu00f3n, usar Railway (actualmente no funciona)
       // BASE_URL = 'https://value-investing-backend-production.up.railway.app';
@@ -57,7 +57,7 @@ const PortfolioBuilder = () => {
         },
         body: JSON.stringify({
           amount: parseFloat(formData.amount),
-          target: formData.allocation
+          target_alloc: formData.allocation
         })
       });
       

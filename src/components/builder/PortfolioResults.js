@@ -3,14 +3,19 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recha
 import './PortfolioResults.css';
 
 const PortfolioResults = ({ portfolio, amount }) => {
+  // Verificar si portfolio existe y tiene la estructura esperada
+  if (!portfolio || !portfolio.allocation) {
+    return <div className="portfolio-results">No hay datos de portfolio disponibles</div>;
+  }
+  
   // Extraer datos del portfolio optimizado
   const { allocation, metrics } = portfolio;
   
   // Combinar todas las posiciones de diferentes categorías en un solo array
   const positions = [
-    ...allocation.value.map(item => ({ ...item, bucket: 'value' })),
-    ...allocation.growth.map(item => ({ ...item, bucket: 'growth' })),
-    ...allocation.bonds.map(item => ({ ...item, bucket: 'bonds' }))
+    ...(allocation.value || []).map(item => ({ ...item, bucket: 'value' })),
+    ...(allocation.growth || []).map(item => ({ ...item, bucket: 'growth' })),
+    ...(allocation.bonds || []).map(item => ({ ...item, bucket: 'bonds' }))
   ];
   
   // Agrupar por bucket (tipo de activo)
