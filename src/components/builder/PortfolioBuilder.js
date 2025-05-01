@@ -44,7 +44,8 @@ const PortfolioBuilder = () => {
     setError('');
     
     try {
-      const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
+      // Usar directamente la URL del backend local
+      const BASE_URL = 'http://localhost:8000';
       const response = await fetch(`${BASE_URL}/api/portfolio/optimize`, {
         method: 'POST',
         headers: {
