@@ -39,37 +39,15 @@ export default function ActionAnalysisModal({ open, onClose, action, analysis, m
       }
     } catch (e) {
       console.error('Error al obtener datos históricos:', e);
-      setError(e.message);
-      // Generar datos simulados como respaldo
-      generateSimulatedData();
+      setError('No se pudieron obtener datos históricos reales. No se usarán datos simulados ni predefinidos.');
+      // No usar datos simulados bajo ninguna circunstancia
     } finally {
       setLoading(false);
     }
   };
   
-  // Función para generar datos simulados en caso de error
-  const generateSimulatedData = () => {
-    const simulatedData = [];
-    const basePrice = action.price || 100;
-    const now = new Date();
-    
-    for (let i = 11; i >= 0; i--) {
-      const date = new Date(now);
-      date.setMonth(now.getMonth() - i);
-      const monthYear = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-      
-      // Simular un movimiento de precio con tendencia ligeramente alcista
-      const randomChange = (Math.random() * 0.1 - 0.03) * basePrice;
-      const price = basePrice * (1 - (i * 0.01)) + randomChange;
-      
-      simulatedData.push({
-        date: monthYear,
-        precio: parseFloat(price.toFixed(2))
-      });
-    }
-    
-    setHistoricalData(simulatedData);
-  };
+  // No se utilizarán datos simulados bajo ninguna circunstancia
+  // Todos los datos deben obtenerse en tiempo real de las APIs
 
   if (!open) return null;
   
