@@ -42,14 +42,21 @@ const PortfolioBuilder = () => {
   const handleOptimize = async () => {
     setLoading(true);
     setError('');
-    
+
     try {
-      // Para desarrollo local, usar el backend local
-      let BASE_URL = 'http://localhost:8002';
+      // Usar la variable de entorno REACT_APP_BACKEND_URL
+      const BASE_URL = 'https://value-investing-5b425882ff1a.herokuapp.com';
+      console.log('Usando backend URL:', BASE_URL);
       
-      // Para producciu00f3n, usar Railway
-      // Descomentar esta línea para usar la versión de producción
-      // BASE_URL = 'https://web-production-d930.up.railway.app';
+      // Asegurar que la asignación tenga valores numéricos
+      const target_alloc = {
+        value: parseInt(formData.allocation.value),
+        growth: parseInt(formData.allocation.growth),
+        bonds: parseInt(formData.allocation.bonds)
+      };
+      
+      const amount = parseFloat(formData.amount);
+      console.log('Enviando datos:', { amount, target_alloc });
 
       const response = await fetch(`${BASE_URL}/api/portfolio/optimize`, {
         method: 'POST',
@@ -57,20 +64,24 @@ const PortfolioBuilder = () => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          amount: parseFloat(formData.amount),
-          target_alloc: formData.allocation
+          amount: amount,
+          target_alloc: target_alloc
         })
       });
-      
+
       if (!response.ok) {
-        throw new Error('Error al optimizar el portfolio');
+        const errorData = await response.text();
+        console.error('Error respuesta:', response.status, errorData);
+        throw new Error(`Error al optimizar el portfolio: ${response.status} ${errorData}`);
       }
-      
+
       const data = await response.json();
+      console.log('Respuesta recibida:', data);
       setPortfolio(data);
       setStep(3); // Avanzar al paso de resultados
     } catch (err) {
-      setError(err.message);
+      console.error('Error completo:', err);
+      setError(err.message || 'Error desconocido al optimizar el portfolio');
     } finally {
       setLoading(false);
     }
@@ -80,52 +91,52 @@ const PortfolioBuilder = () => {
     <div className="portfolio-builder-container">
       <h1>Portfolio Builder</h1>
       <p className="subtitle">Construye tu portfolio optimizado basado en estrategias de Value Investing</p>
-      
+
       <div className="builder-content">
         {step === 1 && (
           <div className="step-container">
             <h2>Paso 1: Define tu horizonte y monto</h2>
             <div className="form-group">
               <label>Monto a invertir ($)</label>
-              <input 
-                type="number" 
-                value={formData.amount} 
+              <input
+                type="number"
+                value={formData.amount}
                 onChange={(e) => handleFormChange('amount', e.target.value)}
                 min="1000"
                 step="1000"
               />
             </div>
-            
+
             <div className="form-group">
               <label>Horizonte de inversión</label>
               <div className="radio-group">
                 <label>
-                  <input 
-                    type="radio" 
-                    name="horizon" 
-                    value="corto" 
+                  <input
+                    type="radio"
+                    name="horizon"
+                    value="corto"
                     checked={formData.horizon === 'corto'}
                     onChange={() => handleFormChange('horizon', 'corto')}
                   />
                   Corto plazo (&lt;5 años)
                 </label>
-                
+
                 <label>
-                  <input 
-                    type="radio" 
-                    name="horizon" 
-                    value="intermedio" 
+                  <input
+                    type="radio"
+                    name="horizon"
+                    value="intermedio"
                     checked={formData.horizon === 'intermedio'}
                     onChange={() => handleFormChange('horizon', 'intermedio')}
                   />
                   Mediano plazo (5-10 años)
                 </label>
-                
+
                 <label>
-                  <input 
-                    type="radio" 
-                    name="horizon" 
-                    value="largo" 
+                  <input
+                    type="radio"
+                    name="horizon"
+                    value="largo"
                     checked={formData.horizon === 'largo'}
                     onChange={() => handleFormChange('horizon', 'largo')}
                   />
@@ -133,65 +144,65 @@ const PortfolioBuilder = () => {
                 </label>
               </div>
             </div>
-            
-            <button 
-              className="next-button" 
+
+            <button
+              className="next-button"
               onClick={() => handleStepChange(2)}
             >
               Continuar
             </button>
           </div>
         )}
-        
+
         {step === 2 && (
           <div className="step-container">
             <h2>Paso 2: Asignación de activos</h2>
             <p>Distribuye tu inversión entre las diferentes estrategias (total debe sumar 100%)</p>
-            
-            <AllocationStepper 
+
+            <AllocationStepper
               allocation={formData.allocation}
               onChange={handleAllocationChange}
             />
-            
+
             <div className="buttons-container">
-              <button 
-                className="back-button" 
+              <button
+                className="back-button"
                 onClick={() => handleStepChange(1)}
               >
                 Atrás
               </button>
-              
-              <button 
-                className="optimize-button" 
+
+              <button
+                className="optimize-button"
                 onClick={handleOptimize}
                 disabled={loading}
               >
                 {loading ? 'Optimizando...' : 'Optimizar Portfolio'}
               </button>
             </div>
-            
+
             {error && <div className="error-message">{error}</div>}
           </div>
         )}
-        
+
         {step === 3 && portfolio && (
           <div className="step-container">
             <h2>Tu Portfolio Optimizado</h2>
-            
-            <PortfolioResults 
+
+            <PortfolioResults
               portfolio={portfolio}
               amount={formData.amount}
             />
-            
+
             <div className="buttons-container">
-              <button 
-                className="back-button" 
+              <button
+                className="back-button"
                 onClick={() => handleStepChange(2)}
               >
                 Modificar Asignación
               </button>
-              
-              <button 
+
+              <button
                 className="save-button"
                 onClick={() => alert('Funcionalidad de guardar portfolio en desarrollo')}
               >
