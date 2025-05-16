@@ -4,9 +4,7 @@ import PortfolioResults from './PortfolioResults';
 import './PortfolioBuilder.css';
 
 const PortfolioBuilder = () => {
-  const [analysisClaude, setAnalysisClaude] = useState('');
-  const [analysisLoading, setAnalysisLoading] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(1); // 1=perfil, 2=asignación, 3=value, 4=growth, 5=bonos, 6=final
   const [formData, setFormData] = useState({
     amount: 10000,
     horizon: 'largo',
@@ -16,9 +14,16 @@ const PortfolioBuilder = () => {
       growth: 25
     }
   });
-  const [portfolio, setPortfolio] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [portfolioValue, setPortfolioValue] = useState(null);
+  const [portfolioGrowth, setPortfolioGrowth] = useState(null);
+  const [portfolioBonds, setPortfolioBonds] = useState(null);
+  const [finalPortfolio, setFinalPortfolio] = useState(null);
+  const [analysisClaude, setAnalysisClaude] = useState('');
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+
+  const BASE_URL = 'https://value-investing-5b425882ff1a.herokuapp.com';
 
   const handleStepChange = (newStep) => {
     setStep(newStep);
@@ -41,67 +46,98 @@ const PortfolioBuilder = () => {
     }));
   };
 
-  const handleOptimize = async () => {
-    setLoading(true);
-    setError('');
-
+  // Paso 3: Buscar Value
+  const fetchValue = async () => {
+    setLoading(true); setError('');
     try {
-      // Usar la variable de entorno REACT_APP_BACKEND_URL
-      const BASE_URL = 'https://value-investing-5b425882ff1a.herokuapp.com';
-      console.log('Usando backend URL:', BASE_URL);
-      
-      // Asegurar que la asignación tenga valores numéricos
-      const target_alloc = {
-        value: parseInt(formData.allocation.value),
-        growth: parseInt(formData.allocation.growth),
-        bonds: parseInt(formData.allocation.bonds)
-      };
-      
-      const amount = parseFloat(formData.amount);
-      console.log('Enviando datos:', { amount, target_alloc });
-
-      const response = await fetch(`${BASE_URL}/api/portfolio/optimize`, {
+      const amount = parseFloat(formData.amount) * (parseInt(formData.allocation.value) / 100);
+      const response = await fetch(`${BASE_URL}/api/portfolio/value`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          amount: amount,
-          target_alloc: target_alloc
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount })
       });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error('Error respuesta:', response.status, errorData);
-        throw new Error(`Error al optimizar el portfolio: ${response.status} ${errorData}`);
-      }
-
-      const data = await response.json();
-      console.log('Respuesta recibida:', data);
-      setPortfolio(data);
-      setStep(3); // Avanzar al paso de resultados
-      setAnalysisClaude(''); // Limpiar análisis anterior
+      if (!response.ok) throw new Error(await response.text());
+      setPortfolioValue(await response.json());
+      setStep(4); // Preguntar por Growth
     } catch (err) {
-      console.error('Error completo:', err);
-      setError(err.message || 'Error desconocido al optimizar el portfolio');
+      setError(err.message || 'Error al buscar Value');
     } finally {
       setLoading(false);
     }
   };
 
-  // Llamar análisis Claude cuando el portfolio cambia y estamos en el paso 3
+  // Paso 4: Buscar Growth
+  const fetchGrowth = async () => {
+    setLoading(true); setError('');
+    try {
+      const amount = parseFloat(formData.amount) * (parseInt(formData.allocation.growth) / 100);
+      const response = await fetch(`${BASE_URL}/api/portfolio/growth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      setPortfolioGrowth(await response.json());
+      setStep(5); // Preguntar por Bonos
+    } catch (err) {
+      setError(err.message || 'Error al buscar Growth');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Paso 5: Buscar Bonos
+  const fetchBonds = async () => {
+    setLoading(true); setError('');
+    try {
+      const amount = parseFloat(formData.amount) * (parseInt(formData.allocation.bonds) / 100);
+      const response = await fetch(`${BASE_URL}/api/portfolio/bonds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      setPortfolioBonds(await response.json());
+      setStep(6); // Paso final: análisis Claude
+    } catch (err) {
+      setError(err.message || 'Error al buscar Bonos');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Paso 6: Ensamblar portafolio final
+  const assembleFinalPortfolio = () => {
+    let allocation = [];
+    if (portfolioValue && portfolioValue.allocation) allocation = allocation.concat(portfolioValue.allocation);
+    if (portfolioGrowth && portfolioGrowth.allocation) allocation = allocation.concat(portfolioGrowth.allocation);
+    if (portfolioBonds && portfolioBonds.allocation) allocation = allocation.concat(portfolioBonds.allocation);
+    const final = {
+      allocation,
+      metrics: {},
+      source: 'combinado',
+    };
+    setFinalPortfolio(final);
+  };
+
+  React.useEffect(() => {
+    if (step === 6) {
+      assembleFinalPortfolio();
+    }
+    // eslint-disable-next-line
+  }, [step]);
+
+  // Llamar análisis Claude cuando el portafolio final está listo y step es 6
   React.useEffect(() => {
     const fetchClaudeAnalysis = async () => {
-      if (step === 3 && portfolio) {
+      if (step === 6 && finalPortfolio) {
         setAnalysisLoading(true);
         setAnalysisClaude('');
         try {
-          const BASE_URL = 'https://value-investing-5b425882ff1a.herokuapp.com';
           const response = await fetch(`${BASE_URL}/api/portfolio/analysis`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ portfolio })
+            body: JSON.stringify({ portfolio: finalPortfolio })
           });
           if (!response.ok) {
             const errorData = await response.text();
@@ -117,9 +153,8 @@ const PortfolioBuilder = () => {
       }
     };
     fetchClaudeAnalysis();
-    // Solo dispara cuando cambia portfolio o step
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [portfolio, step]);
+    // eslint-disable-next-line
+  }, [finalPortfolio, step]);
 
   return (
     <div className="portfolio-builder-container">
@@ -201,47 +236,96 @@ const PortfolioBuilder = () => {
             <div className="buttons-container">
               <button
                 className="back-button"
-                onClick={() => handleStepChange(1)}
+                onClick={() => setStep(1)}
               >
                 Atrás
               </button>
-
               <button
                 className="optimize-button"
-                onClick={handleOptimize}
+                onClick={() => setStep(3)}
                 disabled={loading}
               >
-                {loading ? 'Optimizando...' : 'Optimizar Portfolio'}
+                Continuar
               </button>
             </div>
-
             {error && <div className="error-message">{error}</div>}
           </div>
         )}
 
-        {step === 3 && portfolio && (
+        {/* Paso 3: Buscar Value */}
+        {step === 3 && (
           <div className="step-container">
-            <h2>Tu Portfolio Optimizado</h2>
+            <h2>Paso 3: Buscar Acciones Value</h2>
+            <button onClick={fetchValue} disabled={loading} className="optimize-button">
+              {loading ? 'Buscando Value...' : 'Buscar Value'}
+            </button>
+            {portfolioValue && (
+              <pre style={{background:'#f8f8f8', fontSize:12, padding:8, borderRadius:6, marginTop:12}}>
+                <b>Resultados Value:</b> {JSON.stringify(portfolioValue, null, 2)}
+              </pre>
+            )}
+            {portfolioValue && (
+              <div>
+                <p>¿Quieres agregar acciones Growth?</p>
+                <button onClick={() => setStep(4)} className="optimize-button">Sí, agregar Growth</button>
+                <button onClick={() => setStep(5)} className="back-button">No, ir a Bonos/ETFs</button>
+              </div>
+            )}
+            {error && <div className="error-message">{error}</div>}
+          </div>
+        )}
 
-            {/* DEBUG: Mostrar el JSON recibido del backend */}
+        {/* Paso 4: Buscar Growth */}
+        {step === 4 && (
+          <div className="step-container">
+            <h2>Paso 4: Buscar Acciones Growth</h2>
+            <button onClick={fetchGrowth} disabled={loading} className="optimize-button">
+              {loading ? 'Buscando Growth...' : 'Buscar Growth'}
+            </button>
+            {portfolioGrowth && (
+              <pre style={{background:'#f8f8f8', fontSize:12, padding:8, borderRadius:6, marginTop:12}}>
+                <b>Resultados Growth:</b> {JSON.stringify(portfolioGrowth, null, 2)}
+              </pre>
+            )}
+            {portfolioGrowth && (
+              <div>
+                <p>¿Quieres agregar Bonos/ETFs?</p>
+                <button onClick={() => setStep(5)} className="optimize-button">Sí, agregar Bonos/ETFs</button>
+                <button onClick={() => setStep(6)} className="back-button">No, ver análisis final</button>
+              </div>
+            )}
+            {error && <div className="error-message">{error}</div>}
+          </div>
+        )}
+
+        {/* Paso 5: Buscar Bonos/ETFs */}
+        {step === 5 && (
+          <div className="step-container">
+            <h2>Paso 5: Buscar Bonos/ETFs</h2>
+            <button onClick={fetchBonds} disabled={loading} className="optimize-button">
+              {loading ? 'Buscando Bonos/ETFs...' : 'Buscar Bonos/ETFs'}
+            </button>
+            {portfolioBonds && (
+              <pre style={{background:'#f8f8f8', fontSize:12, padding:8, borderRadius:6, marginTop:12}}>
+                <b>Resultados Bonos/ETFs:</b> {JSON.stringify(portfolioBonds, null, 2)}
+              </pre>
+            )}
+            {portfolioBonds && (
+              <div>
+                <button onClick={() => setStep(6)} className="optimize-button">Ver análisis final</button>
+              </div>
+            )}
+            {error && <div className="error-message">{error}</div>}
+          </div>
+        )}
+
+        {/* Paso 6: Portafolio final y análisis Claude */}
+        {step === 6 && finalPortfolio && (
+          <div className="step-container">
+            <h2>Tu Portafolio Combinado</h2>
             <pre style={{background:'#f8f8f8', fontSize:12, padding:8, borderRadius:6, marginBottom:12, overflowX:'auto'}}>
-              <b>DEBUG portfolio:</b> {JSON.stringify(portfolio, null, 2)}
+              <b>DEBUG portfolio:</b> {JSON.stringify(finalPortfolio, null, 2)}
             </pre>
-
-            {/* Mensaje si allocation está vacío */}
-            {Array.isArray(portfolio.allocation) && portfolio.allocation.length === 0 && (
-              <div style={{color:'red',marginBottom:10}}>
-                ⚠️ El backend devolvió allocation vacío. No hay posiciones para mostrar.
-              </div>
-            )}
-            {/* Mensaje si metrics está vacío */}
-            {portfolio.metrics && Object.keys(portfolio.metrics).length === 0 && (
-              <div style={{color:'orange',marginBottom:10}}>
-                ⚠️ El backend devolvió metrics vacío.
-              </div>
-            )}
-
-            {/* Análisis de Claude */}
             {analysisLoading ? (
               <div style={{margin:'12px 0',color:'#3b5998'}}>Generando análisis cualitativo con Claude...</div>
             ) : analysisClaude ? (
@@ -250,24 +334,11 @@ const PortfolioBuilder = () => {
                 <div dangerouslySetInnerHTML={{ __html: analysisClaude }} />
               </div>
             ) : null}
-
-            <PortfolioResults
-              portfolio={portfolio}
-              amount={formData.amount}
-            />
-
             <div className="buttons-container">
-              <button
-                className="back-button"
-                onClick={() => handleStepChange(2)}
-              >
+              <button className="back-button" onClick={() => setStep(2)}>
                 Modificar Asignación
               </button>
-
-              <button
-                className="save-button"
-                onClick={() => alert('Funcionalidad de guardar portfolio en desarrollo')}
-              >
+              <button className="save-button" onClick={() => alert('Funcionalidad de guardar portfolio en desarrollo')}>
                 Guardar Portfolio
               </button>
             </div>
