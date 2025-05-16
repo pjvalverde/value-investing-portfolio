@@ -323,9 +323,8 @@ const PortfolioBuilder = () => {
         {step === 6 && finalPortfolio && (
           <div className="step-container">
             <h2>Tu Portafolio Combinado</h2>
-            <pre style={{background:'#f8f8f8', fontSize:12, padding:8, borderRadius:6, marginBottom:12, overflowX:'auto'}}>
-              <b>DEBUG portfolio:</b> {JSON.stringify(finalPortfolio, null, 2)}
-            </pre>
+            {/* Visualización moderna: tabla y gráfico */}
+            <PortfolioResults portfolio={finalPortfolio} amount={formData.amount} />
             {analysisLoading ? (
               <div style={{margin:'12px 0',color:'#3b5998'}}>Generando análisis cualitativo con Claude...</div>
             ) : analysisClaude ? (
