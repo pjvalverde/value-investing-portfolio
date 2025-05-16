@@ -192,6 +192,11 @@ const PortfolioBuilder = () => {
           <div className="step-container">
             <h2>Tu Portfolio Optimizado</h2>
 
+            {/* DEBUG: Mostrar el JSON recibido del backend */}
+            <pre style={{background:'#f8f8f8', fontSize:12, padding:8, borderRadius:6, marginBottom:12}}>
+              <b>DEBUG portfolio:</b> {JSON.stringify(portfolio, null, 2)}
+            </pre>
+
             <PortfolioResults
               portfolio={portfolio}
               amount={formData.amount}
