@@ -2,9 +2,6 @@ import React, { useState } from 'react';
 import AllocationStepper from './AllocationStepper';
 import PortfolioResults from './PortfolioResults';
 import './PortfolioBuilder.css';
-import AllocationStepper from './AllocationStepper';
-import PortfolioResults from './PortfolioResults';
-import './PortfolioBuilder.css';
 
 const PortfolioBuilder = () => {
   const [step, setStep] = useState(1);
