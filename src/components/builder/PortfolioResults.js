@@ -1,4 +1,6 @@
 import React from 'react';
+import PortfolioTable from './PortfolioTable';
+import PortfolioCharts from './PortfolioCharts';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import './PortfolioResults.css';
 
