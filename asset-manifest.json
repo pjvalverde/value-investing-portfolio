@@ -1,19 +1,19 @@
 {
   "files": {
     "main.css": "/value-investing-portfolio/static/css/main.ebffde94.css",
-    "main.js": "/value-investing-portfolio/static/js/main.5403e037.js",
+    "main.js": "/value-investing-portfolio/static/js/main.5602ee8e.js",
     "static/js/977.43fa625e.chunk.js": "/value-investing-portfolio/static/js/977.43fa625e.chunk.js",
     "static/js/732.dec8343c.chunk.js": "/value-investing-portfolio/static/js/732.dec8343c.chunk.js",
     "static/js/453.d6ff9e32.chunk.js": "/value-investing-portfolio/static/js/453.d6ff9e32.chunk.js",
     "index.html": "/value-investing-portfolio/index.html",
     "main.ebffde94.css.map": "/value-investing-portfolio/static/css/main.ebffde94.css.map",
-    "main.5403e037.js.map": "/value-investing-portfolio/static/js/main.5403e037.js.map",
+    "main.5602ee8e.js.map": "/value-investing-portfolio/static/js/main.5602ee8e.js.map",
     "977.43fa625e.chunk.js.map": "/value-investing-portfolio/static/js/977.43fa625e.chunk.js.map",
     "732.dec8343c.chunk.js.map": "/value-investing-portfolio/static/js/732.dec8343c.chunk.js.map",
     "453.d6ff9e32.chunk.js.map": "/value-investing-portfolio/static/js/453.d6ff9e32.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.ebffde94.css",
-    "static/js/main.5403e037.js"
+    "static/js/main.5602ee8e.js"
   ]
 }
