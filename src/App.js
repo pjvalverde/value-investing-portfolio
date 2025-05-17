@@ -55,7 +55,7 @@ function App() {
           endpoint = '/api/portfolio/growth';
           break;
         case 'bonds':
-          endpoint = '/api/portfolio/bonds';
+          endpoint = '/api/portfolio/disruptive';
           break;
         default:
           throw new Error('Tipo de portafolio no válido');

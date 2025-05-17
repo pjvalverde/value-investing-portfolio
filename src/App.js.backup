@@ -1,0 +1,452 @@
+<<<<<<< HEAD
+import './App.css';
+import { useState } from 'react';
+import { 
+  Typography, 
+  Container, 
+  Box, 
+  Paper, 
+  CircularProgress,
+  Button,
+  TextField,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel
+} from '@mui/material';
+import SearchFlow, { SEARCH_STEPS } from './components/SearchFlow';
+
+function App() {
+  const [formData, setFormData] = useState({
+    amount: '',
+    horizon: 'largo', // corto, mediano, largo
+  });
+  
+  const [searchState, setSearchState] = useState({
+    step: SEARCH_STEPS.INITIAL,
+    results: null,
+    loading: false,
+    error: null
+  });
+  
+  const [analysis, setAnalysis] = useState('');
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [historicalData, setHistoricalData] = useState([]);
+  const [comparativeData, setComparativeData] = useState([]);
+
+  const handleStartSearch = (data) => {
+    setFormData(data);
+    setSearchState(prevState => ({
+      ...prevState,
+      step: SEARCH_STEPS.SEARCHING,
+      loading: true,
+      error: null
+    }));
+  };
+
+  const handleSearchComplete = (results) => {
+    setSearchState(prevState => ({
+      ...prevState,
+      step: SEARCH_STEPS.COMPLETED,
+      results,
+      loading: false
+    }));
+  }; 
+  
+  const handleError = (error) => {
+    setSearchState(prevState => ({
+      ...prevState,
+      step: SEARCH_STEPS.ERROR,
+      error: error || 'Ocurrió un error en la búsqueda',
+      loading: false
+    }));
+  };
+
+  const resetSearch = () => {
+    setSearchState({
+      step: SEARCH_STEPS.INITIAL,
+      results: null,
+      loading: false,
+      error: null
+    });
+  };
+  
+  // Componentes de la interfaz de usuario
+  const renderInitialForm = () => (
+    <Paper elevation={3} sx={{ p: 4, maxWidth: 800, mx: 'auto', mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom align="center">
+        Value Investing Portfolio Builder
+      </Typography>
+      
+      <Box sx={{ mt: 4 }}>
+        <Typography variant="h6" gutterBottom>
+          Configura tu portafolio
+        </Typography>
+        
+        <Box component="form" onSubmit={(e) => {
+          e.preventDefault();
+          if (formData.amount) {
+            handleStartSearch(formData);
+          }
+        }}>
+          <Box sx={{ mb: 3 }}>
+            <Typography gutterBottom>Monto a invertir (USD)</Typography>
+            <TextField
+              type="number"
+              value={formData.amount}
+              onChange={(e) => setFormData({...formData, amount: e.target.value})}
+              min="100"
+              step="100"
+              required
+              fullWidth
+              sx={{ mt: 1 }}
+            />
+          </Box>
+          
+          <Box sx={{ mb: 3 }}>
+            <Typography gutterBottom>Horizonte de inversión</Typography>
+            <FormControl fullWidth>
+              <InputLabel id="horizon-select-label">Horizonte de inversión</InputLabel>
+              <Select
+                labelId="horizon-select-label"
+                id="horizon-select"
+                value={formData.horizon}
+                label="Horizonte de inversión"
+                onChange={(e) => setFormData({...formData, horizon: e.target.value})}
+              >
+                <MenuItem value="corto">Corto plazo (menos de 5 años)</MenuItem>
+                <MenuItem value="mediano">Mediano plazo (5-10 años)</MenuItem>
+                <MenuItem value="largo">Largo plazo (más de 10 años)</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          
+          <Button
+            type="submit"
+            disabled={!formData.amount}
+            variant="contained"
+            sx={{ mt: 2, width: '100%' }}
+          >
+            {searchState.loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Generar Portafolio'
+            )}
+          </Button>
+        </Box>
+      </Box>
+    </Paper>
+  );
+  
+  const renderSearchFlow = () => (
+    <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
+      <SearchFlow 
+        amount={formData.amount}
+        horizon={formData.horizon}
+        onSearchComplete={handleSearchComplete}
+        onError={handleError}
+      />
+      
+      {searchState.step === SEARCH_STEPS.ERROR && (
+        <Box sx={{ mt: 2, p: 2, bgcolor: '#ffebee', borderRadius: 1 }}>
+          <Typography color="error">{searchState.error}</Typography>
+          <Button 
+            onClick={resetSearch}
+            variant="outlined"
+            sx={{ mt: 2 }}
+          >
+            Volver al inicio
+          </Button>
+        </Box>
+      )}
+    </Container>
+  );
+  
+  const renderResults = () => {
+    if (!searchState.results) return null;
+    
+    return (
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Resultados de tu portafolio
+        </Typography>
+        
+        <Box sx={{ mt: 4 }}>
+          <Typography variant="h6">Análisis del portafolio</Typography>
+          <Paper sx={{ p: 3, mt: 2, bgcolor: '#f5f5f5' }}>
+            {searchState.results.analysis?.analysis || 'No hay análisis disponible'}
+          </Paper>
+        </Box>
+        
+        <Box sx={{ mt: 4, display: 'flex', justifyContent: 'center' }}>
+          <Button
+            onClick={resetSearch}
+            variant="outlined"
+            sx={{ mt: 2 }}
+          >
+            Realizar otra búsqueda
+          </Button>
+        </Box>
+      </Container>
+    );
+  }; 
+  
+  // Renderizado principal
+  const renderContent = () => {
+    switch(searchState.step) {
+      case SEARCH_STEPS.INITIAL:
+        return renderInitialForm();
+      case SEARCH_STEPS.COMPLETED:
+        return renderResults();
+      default:
+        return renderSearchFlow();
+=======
+import React, { useState } from 'react';
+import PortfolioForm from './components/PortfolioForm';
+import PortfolioTable from './components/PortfolioTable';
+
+function App() {
+  // URL base del backend
+  const BACKEND_URL = 'https://value-investing-5b425882ff1a.herokuapp.com';
+  
+  // Estados para manejar los datos y el flujo
+  const [formData, setFormData] = useState(null);
+  const [valueData, setValueData] = useState(null);
+  const [growthData, setGrowthData] = useState(null);
+  const [bondsData, setBondsData] = useState(null);
+  const [combinedPortfolio, setCombinedPortfolio] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0); // 0=form, 1=value, 2=growth, 3=bonds, 4=show
+  const [error, setError] = useState('');
+  const [analysis, setAnalysis] = useState('');
+
+  // Función para conectar con el backend real (sin simulación)
+  const fetchPortfolio = async (type) => {
+    if (!formData) return null;
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      let endpoint = '';
+      
+      switch(type) {
+        case 'value':
+          endpoint = '/api/portfolio/value';
+          break;
+        case 'growth':
+          endpoint = '/api/portfolio/growth';
+          break;
+        case 'bonds':
+          endpoint = '/api/portfolio/bonds';
+          break;
+        default:
+          throw new Error('Tipo de portafolio no válido');
+      }
+      
+      const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          amount: parseFloat(formData.amount),
+          horizon: formData.horizon,
+          sectors: formData.sectors
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error en la respuesta del servidor: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (e) {
+      setError(`Error al conectar con el backend para ${type}: ${e.message}`);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Función para obtener análisis de Claude una vez que tenemos todos los datos
+  const fetchClaudeAnalysis = async () => {
+    try {
+      setLoading(true);
+      
+      // Combinar todos los datos de las acciones
+      const portfolio = {
+        value: valueData?.allocation || [],
+        growth: growthData?.allocation || [],
+        bonds: bondsData?.allocation || []
+      };
+      
+      // Convertir a un formato plano para mostrar en la tabla
+      const flatPortfolio = [
+        ...portfolio.value.map(item => ({...item, tipo: 'value'})),
+        ...portfolio.growth.map(item => ({...item, tipo: 'growth'})),
+        ...portfolio.bonds.map(item => ({...item, tipo: 'bonds'}))
+      ];
+      
+      setCombinedPortfolio(flatPortfolio);
+      
+      // Llamar a la API de Claude para análisis
+      const response = await fetch(`${BACKEND_URL}/api/portfolio/analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          portfolio: portfolio,
+          strategy_description: `Portafolio para horizonte ${formData.horizon} con monto ${formData.amount}`,
+          language: 'es'
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error al obtener análisis: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setAnalysis(data.analysis || 'No se pudo obtener análisis detallado');
+    } catch (e) {
+      setError(`Error al obtener análisis: ${e.message}`);
+      setAnalysis('No se pudo obtener el análisis cualitativo');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Manejador del formulario inicial
+  const handleFormSubmit = (data) => {
+    setFormData(data);
+    setStep(1);
+  };
+
+  // Manejadores para los botones secuenciales
+  const handleFetchValue = async () => {
+    const data = await fetchPortfolio('value');
+    if (data) {
+      setValueData(data);
+      setStep(2);
+    }
+  };
+  
+  const handleFetchGrowth = async () => {
+    const data = await fetchPortfolio('growth');
+    if (data) {
+      setGrowthData(data);
+      setStep(3);
+    }
+  };
+  
+  const handleFetchBonds = async () => {
+    const data = await fetchPortfolio('bonds');
+    if (data) {
+      setBondsData(data);
+      setStep(4);
+      // Una vez que tenemos todos los datos, solicitamos el análisis de Claude
+      await fetchClaudeAnalysis();
+>>>>>>> 0f92bd4 (Implementado flujo secuencial de botones y conexiu00f3n real al backend sin datos simulados)
+    }
+  };
+
+  return (
+<<<<<<< HEAD
+    <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
+      <header style={{
+        backgroundColor: '#1976d2',
+        color: 'white',
+        padding: '20px 0',
+        marginBottom: '40px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+      }}>
+        <Container maxWidth="lg">
+          <Typography variant="h4" component="h1" style={{ fontWeight: 'bold' }}>
+            Value Investing Portfolio
+          </Typography>
+          <Typography variant="subtitle1">
+            Construye tu portafolio de inversión basado en valor
+          </Typography>
+        </Container>
+      </header>
+      
+      <main>
+        {renderContent()}
+      </main>
+      
+      <footer style={{
+        marginTop: '60px',
+        padding: '20px 0',
+        backgroundColor: '#333',
+        color: '#fff',
+        textAlign: 'center'
+      }}>
+        <Container maxWidth="lg">
+          <Typography variant="body2">
+            © {new Date().getFullYear()} Value Investing Portfolio. Todos los derechos reservados.
+          </Typography>
+          <Typography variant="caption" display="block" sx={{ mt: 1, opacity: 0.7 }}>
+            Esta herramienta es solo con fines educativos e informativos. No constituye asesoramiento de inversión.
+          </Typography>
+        </Container>
+      </footer>
+=======
+    <div style={{ maxWidth: 600, margin: '40px auto', background: '#fff', borderRadius: 12, boxShadow: '0 2px 8px #0001', padding: 24 }}>
+      <h1 style={{ textAlign: 'center', marginBottom: 24 }}>Value Investing Portfolio App</h1>
+      {error && <div style={{ color: 'red', marginBottom: 16 }}>{error}</div>}
+      
+      {/* Formulario inicial */}
+      {step === 0 && <PortfolioForm onSubmit={handleFormSubmit} loading={loading} />}
+      
+      {/* Botón para buscar Value */}
+      {step === 1 && (
+        <button 
+          onClick={handleFetchValue} 
+          disabled={loading} 
+          style={{ width: '100%', padding: 16, fontSize: 18, backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 8, cursor: loading ? 'not-allowed' : 'pointer' }}
+        >
+          {loading ? 'Buscando Value...' : 'Buscar Value (máx. 5)'}
+        </button>
+      )}
+      
+      {/* Botón para buscar Growth */}
+      {step === 2 && (
+        <button 
+          onClick={handleFetchGrowth} 
+          disabled={loading} 
+          style={{ width: '100%', padding: 16, fontSize: 18, backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: 8, cursor: loading ? 'not-allowed' : 'pointer' }}
+        >
+          {loading ? 'Buscando Growth...' : 'Buscar Growth (máx. 5)'}
+        </button>
+      )}
+      
+      {/* Botón para buscar Bonos/ETF */}
+      {step === 3 && (
+        <button 
+          onClick={handleFetchBonds} 
+          disabled={loading} 
+          style={{ width: '100%', padding: 16, fontSize: 18, backgroundColor: '#9C27B0', color: 'white', border: 'none', borderRadius: 8, cursor: loading ? 'not-allowed' : 'pointer' }}
+        >
+          {loading ? 'Buscando Bonos/ETF...' : 'Buscar Bonos y ETF (máx. 2)'}
+        </button>
+      )}
+      
+      {/* Visualización de resultados */}
+      {step === 4 && (
+        <>
+          <h2 style={{ margin: '32px 0 16px 0' }}>Portafolio Combinado</h2>
+          <PortfolioTable portfolio={combinedPortfolio} />
+          <div style={{ margin: '32px 0 0 0', background: '#f8f9fa', padding: 16, borderRadius: 8 }}>
+            <h3>Análisis Claude</h3>
+            <div>{analysis}</div>
+          </div>
+        </>
+      )}
+>>>>>>> 0f92bd4 (Implementado flujo secuencial de botones y conexiu00f3n real al backend sin datos simulados)
+    </div>
+  );
+}
+
+export default App;
