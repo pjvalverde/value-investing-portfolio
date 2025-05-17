@@ -202,12 +202,13 @@ function App() {
         return renderSearchFlow();
 =======
 import React, { useState } from 'react';
+import { CONFIG } from './config';
 import PortfolioForm from './components/PortfolioForm';
 import PortfolioTable from './components/PortfolioTable';
 
 function App() {
   // URL base del backend
-  const BACKEND_URL = 'https://value-investing-5b425882ff1a.herokuapp.com';
+  const BACKEND_URL = CONFIG.BACKEND_URL;
   
   // Estados para manejar los datos y el flujo
   const [formData, setFormData] = useState(null);
