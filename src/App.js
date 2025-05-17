@@ -15,6 +15,123 @@ import {
 function App() {
   // URL base del backend
   const BACKEND_URL = CONFIG.BACKEND_URL;
+
+  // Estados del flujo secuencial
+  const [formData, setFormData] = useState(null);
+  const [valueData, setValueData] = useState(null);
+  const [growthData, setGrowthData] = useState(null);
+  const [bondsData, setBondsData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(0); // 0=form, 1=value, 2=growth, 3=bonds, 4=show
+  const [error, setError] = useState('');
+  const [analysis, setAnalysis] = useState('');
+
+  // Resetear todo al volver al formulario
+  const handleFormSubmit = (data) => {
+    setFormData(data);
+    setValueData(null);
+    setGrowthData(null);
+    setBondsData(null);
+    setAnalysis('');
+    setError('');
+    setStep(1);
+  };
+
+  // Fetches secuenciales, solo datos reales
+  const fetchValue = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/portfolio/value`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Error al obtener Value');
+      const data = await res.json();
+      setValueData(data);
+      setStep(2);
+    } catch (err) {
+      setError('No se pudo obtener Value: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchGrowth = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/portfolio/growth`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Error al obtener Growth');
+      const data = await res.json();
+      setGrowthData(data);
+      setStep(3);
+    } catch (err) {
+      setError('No se pudo obtener Growth: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBonds = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/portfolio/bonds`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) throw new Error('Error al obtener Bonos/ETF');
+      const data = await res.json();
+      setBondsData(data);
+      setStep(4);
+      fetchClaudeAnalysis(data);
+    } catch (err) {
+      setError('No se pudo obtener Bonos/ETF: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Pedir análisis SOLO cuando los tres están listos
+  const fetchClaudeAnalysis = async () => {
+    if (!valueData || !growthData || !bondsData) return;
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/portfolio/analysis`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          portfolio: {
+            value: valueData.portfolio || [],
+            growth: growthData.portfolio || [],
+            bonds: bondsData.portfolio || []
+          },
+          amount: formData.amount,
+          horizon: formData.horizon,
+          language: 'es'
+        })
+      });
+      if (!res.ok) throw new Error('Error en análisis de Claude');
+      const data = await res.json();
+      setAnalysis(data.analysis || 'Sin análisis disponible');
+    } catch (err) {
+      setError('No se pudo obtener análisis: ' + err.message);
+      setAnalysis('');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // URL base del backend
+  const BACKEND_URL = CONFIG.BACKEND_URL;
   
   // Estados para manejar los datos y el flujo
   const [formData, setFormData] = useState(null);
@@ -80,7 +197,19 @@ function App() {
 
   // Función para obtener análisis de Claude una vez que tenemos todos los datos
   const fetchClaudeAnalysis = async () => {
-    if (!valueData || !growthData || !bondsData) return;
+    console.log('Iniciando fetchClaudeAnalysis...');
+    
+    if (!valueData || !growthData || !bondsData) {
+      const errorMsg = 'Faltan datos para generar el análisis: ' + 
+        JSON.stringify({
+          valueData: !!valueData,
+          growthData: !!growthData,
+          bondsData: !!bondsData
+        });
+      console.error(errorMsg);
+      setError(errorMsg);
+      return;
+    }
     
     try {
       setLoading(true);
@@ -92,31 +221,67 @@ function App() {
         bonds: bondsData.portfolio || []
       };
       
+      console.log('Preparando solicitud de análisis...');
+      const requestBody = {
+        portfolio: portfolio,
+        amount: formData.amount,
+        horizon: formData.horizon,
+        risk_profile: formData.riskProfile,
+        language: 'es'
+      };
+      
+      console.log('Enviando solicitud a:', `${BACKEND_URL}/api/portfolio/analysis`);
+      console.log('Cuerpo de la solicitud:', JSON.stringify(requestBody, null, 2));
+      
+      const startTime = Date.now();
       const response = await fetch(`${BACKEND_URL}/api/portfolio/analysis`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          portfolio: portfolio,
-          amount: formData.amount,
-          horizon: formData.horizon,
-          risk_profile: formData.riskProfile,
-          language: 'es'
-        })
+        body: JSON.stringify(requestBody),
+        credentials: 'include'
       });
       
+      const endTime = Date.now();
+      console.log(`Respuesta recibida en ${endTime - startTime}ms. Estado:`, response.status);
+      
       if (!response.ok) {
-        throw new Error(`Error del servidor: ${response.status}`);
+        let errorText;
+        try {
+          errorText = await response.text();
+          console.error('Error en la respuesta del servidor:', errorText);
+          // Intentar parsear como JSON si es posible
+          try {
+            const errorJson = JSON.parse(errorText);
+            throw new Error(errorJson.detail || errorJson.message || `Error ${response.status}`);
+          } catch (e) {
+            throw new Error(`Error ${response.status}: ${errorText}`);
+          }
+        } catch (textError) {
+          console.error('Error al leer el cuerpo de la respuesta de error:', textError);
+          throw new Error(`Error ${response.status}: No se pudo leer el mensaje de error`);
+        }
       }
       
       const data = await response.json();
-      setAnalysis(data.analysis || 'No se pudo generar el análisis');
+      console.log('Análisis recibido:', data.analysis ? '✅ Datos recibidos' : '❌ Sin datos de análisis');
+      
+      if (!data.analysis) {
+        console.warn('El servidor no devolvió un análisis válido:', data);
+        throw new Error('El servidor no devolvió un análisis válido');
+      }
+      
+      setAnalysis(data.analysis);
+      console.log('Análisis establecido en el estado');
       
     } catch (err) {
-      console.error('Error al obtener el análisis:', err);
+      console.error('❌ Error en fetchClaudeAnalysis:', err);
       setError(`Error al generar el análisis: ${err.message}`);
+      // Forzar un nuevo renderizado del error
+      setAnalysis(null);
     } finally {
+      console.log('Finalizando fetchClaudeAnalysis');
       setLoading(false);
     }
   };
@@ -145,12 +310,31 @@ function App() {
   };
   
   const handleFetchBonds = async () => {
-    const data = await fetchPortfolio('bonds');
-    if (data) {
-      setBondsData(data);
-      setStep(4); // Ir al paso final (Mostrar resultados)
-      // Una vez que tenemos todos los datos, obtenemos el análisis
-      await fetchClaudeAnalysis();
+    try {
+      setLoading(true);
+      const data = await fetchPortfolio('bonds');
+      if (data) {
+        setBondsData(data);
+        setStep(4); // Ir al paso final (Mostrar resultados)
+        
+        // Verificar que todos los datos necesarios estén disponibles
+        if (valueData && growthData) {
+          console.log('Todos los datos están disponibles, generando análisis...');
+          await fetchClaudeAnalysis();
+        } else {
+          console.error('Faltan datos para generar el análisis:', {
+            valueData: !!valueData,
+            growthData: !!growthData,
+            bondsData: !!data
+          });
+          setError('No se pudieron cargar todos los datos necesarios. Por favor, inténtalo de nuevo.');
+        }
+      }
+    } catch (error) {
+      console.error('Error al obtener bonos:', error);
+      setError(`Error al obtener los bonos: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -178,85 +362,62 @@ function App() {
           {step === 0 && (
             <PortfolioForm onSubmit={handleFormSubmit} loading={loading} />
           )}
-          
-          {step > 0 && (
-            <div style={{ marginTop: '2rem' }}>
-              <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '2rem',
-                padding: '1rem',
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }}>
-                <Button 
-                  variant={step >= 1 ? 'contained' : 'outlined'}
-                  color="primary"
-                  onClick={handleFetchValue}
-                  disabled={loading}
-                >
-                  {valueData ? '✓ Value' : '1. Value'}
-                </Button>
-                
-                <Button 
-                  variant={step >= 2 ? 'contained' : 'outlined'}
-                  color="primary"
-                  onClick={handleFetchGrowth}
-                  disabled={step < 1 || loading}
-                >
-                  {growthData ? '✓ Growth' : '2. Growth'}
-                </Button>
-                
-                <Button 
-                  variant={step >= 3 ? 'contained' : 'outlined'}
-                  color="primary"
-                  onClick={handleFetchBonds}
-                  disabled={step < 2 || loading}
-                >
-                  {bondsData ? '✓ Bonds' : '3. Bonds'}
-                </Button>
+
+          {step === 1 && !loading && (
+            <Button variant="contained" color="primary" onClick={fetchValue}>
+              Buscar Value
+            </Button>
+          )}
+
+          {step === 2 && !loading && (
+            <Button variant="contained" color="primary" onClick={fetchGrowth}>
+              Buscar Growth
+            </Button>
+          )}
+
+          {step === 3 && !loading && (
+            <Button variant="contained" color="primary" onClick={fetchBonds}>
+              Buscar Bonos/ETF
+            </Button>
+          )}
+
+          {loading && (
+            <div style={{ textAlign: 'center', margin: '2rem 0' }}>
+              <CircularProgress />
+              <p style={{ marginTop: '1rem' }}>Procesando, por favor espere...</p>
+            </div>
+          )}
+
+          {error && (
+            <Alert severity="error" style={{ margin: '1rem 0' }}>
+              {error}
+            </Alert>
+          )}
+
+          {step === 4 && !loading && (
+            <div>
+              <Typography variant="h5" gutterBottom>
+                Análisis de tu portafolio
+              </Typography>
+
+              <Paper style={{ padding: '2rem', margin: '1rem 0' }}>
+                <Typography variant="body1" style={{ whiteSpace: 'pre-line' }}>
+                  {analysis || 'Generando análisis...'}
+                </Typography>
+              </Paper>
+
+              <div style={{ marginTop: '2rem' }}>
+                <Typography variant="h6" gutterBottom>
+                  Resumen del portafolio
+                </Typography>
+                <PortfolioTable 
+                  portfolio={[
+                    ...(valueData?.portfolio || []),
+                    ...(growthData?.portfolio || []),
+                    ...(bondsData?.portfolio || [])
+                  ]}
+                />
               </div>
-              
-              {loading && (
-                <div style={{ textAlign: 'center', margin: '2rem 0' }}>
-                  <CircularProgress />
-                  <p style={{ marginTop: '1rem' }}>Procesando, por favor espere...</p>
-                </div>
-              )}
-              
-              {error && (
-                <Alert severity="error" style={{ margin: '1rem 0' }}>
-                  {error}
-                </Alert>
-              )}
-              
-              {step === 4 && !loading && (
-                <div>
-                  <Typography variant="h5" gutterBottom>
-                    Análisis de tu portafolio
-                  </Typography>
-                  
-                  <Paper style={{ padding: '2rem', margin: '1rem 0' }}>
-                    <Typography variant="body1" style={{ whiteSpace: 'pre-line' }}>
-                      {analysis || 'Generando análisis...'}
-                    </Typography>
-                  </Paper>
-                  
-                  <div style={{ marginTop: '2rem' }}>
-                    <Typography variant="h6" gutterBottom>
-                      Resumen del portafolio
-                    </Typography>
-                    
-                    <PortfolioTable 
-                      valueData={valueData}
-                      growthData={growthData}
-                      bondsData={bondsData}
-                      amount={formData.amount}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           )}
         </Container>
