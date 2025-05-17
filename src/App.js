@@ -117,7 +117,7 @@ function App() {
         // Verificar que todos los datos necesarios estén disponibles
         if (valueData && growthData) {
           console.log('Todos los datos están disponibles, generando análisis...');
-          await fetchClaudeAnalysis();
+          fetchClaudeAnalysis();
         } else {
           console.error('Faltan datos para generar el análisis:', {
             valueData: !!valueData,
@@ -227,27 +227,6 @@ function App() {
   };
 
         
-        // Verificar que todos los datos necesarios estén disponibles
-        if (valueData && growthData) {
-          console.log('Todos los datos están disponibles, generando análisis...');
-          await fetchClaudeAnalysis();
-        } else {
-          console.error('Faltan datos para generar el análisis:', {
-            valueData: !!valueData,
-            growthData: !!growthData,
-            bondsData: !!data
-          });
-          setError('No se pudieron cargar todos los datos necesarios. Por favor, inténtalo de nuevo.');
-        }
-      }
-    } catch (error) {
-      console.error('Error al obtener bonos:', error);
-      setError(`Error al obtener los bonos: ${error.message}`);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
       <header style={{
@@ -274,19 +253,19 @@ function App() {
           )}
 
           {step === 1 && !loading && (
-            <Button variant="contained" color="primary" onClick={fetchValue}>
+            <Button variant="contained" color="primary" onClick={handleFetchValue}>
               Buscar Value
             </Button>
           )}
 
           {step === 2 && !loading && (
-            <Button variant="contained" color="primary" onClick={fetchGrowth}>
+            <Button variant="contained" color="primary" onClick={handleFetchGrowth}>
               Buscar Growth
             </Button>
           )}
 
           {step === 3 && !loading && (
-            <Button variant="contained" color="primary" onClick={fetchBonds}>
+            <Button variant="contained" color="primary" onClick={handleFetchBonds}>
               Buscar Bonos/ETF
             </Button>
           )}
