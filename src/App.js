@@ -37,112 +37,6 @@ function App() {
     setStep(1);
   };
 
-  // Fetches secuenciales, solo datos reales
-  const fetchValue = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/portfolio/value`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (!res.ok) throw new Error('Error al obtener Value');
-      const data = await res.json();
-      setValueData(data);
-      setStep(2);
-    } catch (err) {
-      setError('No se pudo obtener Value: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchGrowth = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/portfolio/growth`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (!res.ok) throw new Error('Error al obtener Growth');
-      const data = await res.json();
-      setGrowthData(data);
-      setStep(3);
-    } catch (err) {
-      setError('No se pudo obtener Growth: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchBonds = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/portfolio/bonds`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (!res.ok) throw new Error('Error al obtener Bonos/ETF');
-      const data = await res.json();
-      setBondsData(data);
-      setStep(4);
-      fetchClaudeAnalysis(data);
-    } catch (err) {
-      setError('No se pudo obtener Bonos/ETF: ' + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Pedir análisis SOLO cuando los tres están listos
-  const fetchClaudeAnalysis = async () => {
-    if (!valueData || !growthData || !bondsData) return;
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/portfolio/analysis`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          portfolio: {
-            value: valueData.portfolio || [],
-            growth: growthData.portfolio || [],
-            bonds: bondsData.portfolio || []
-          },
-          amount: formData.amount,
-          horizon: formData.horizon,
-          language: 'es'
-        })
-      });
-      if (!res.ok) throw new Error('Error en análisis de Claude');
-      const data = await res.json();
-      setAnalysis(data.analysis || 'Sin análisis disponible');
-    } catch (err) {
-      setError('No se pudo obtener análisis: ' + err.message);
-      setAnalysis('');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // URL base del backend
-  const BACKEND_URL = CONFIG.BACKEND_URL;
-  
-  // Estados para manejar los datos y el flujo
-  const [formData, setFormData] = useState(null);
-  const [valueData, setValueData] = useState(null);
-  const [growthData, setGrowthData] = useState(null);
-  const [bondsData, setBondsData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [step, setStep] = useState(0); // 0=form, 1=value, 2=growth, 3=bonds, 4=show
-  const [error, setError] = useState('');
-  const [analysis, setAnalysis] = useState('');
-
   // Función para conectar con el backend real (sin simulación)
   const fetchPortfolio = async (type) => {
     if (!formData) return null;
@@ -195,7 +89,53 @@ function App() {
     }
   };
 
-  // Función para obtener análisis de Claude una vez que tenemos todos los datos
+  // Manejadores para los botones secuenciales
+  const handleFetchValue = async () => {
+    const data = await fetchPortfolio('value');
+    if (data) {
+      setValueData(data);
+      setStep(2); // Ir al siguiente paso (Growth)
+    }
+  };
+  
+  const handleFetchGrowth = async () => {
+    const data = await fetchPortfolio('growth');
+    if (data) {
+      setGrowthData(data);
+      setStep(3); // Ir al siguiente paso (Bonds)
+    }
+  };
+  
+  const handleFetchBonds = async () => {
+    try {
+      setLoading(true);
+      const data = await fetchPortfolio('bonds');
+      if (data) {
+        setBondsData(data);
+        setStep(4); // Ir al paso final (Mostrar resultados)
+        
+        // Verificar que todos los datos necesarios estén disponibles
+        if (valueData && growthData) {
+          console.log('Todos los datos están disponibles, generando análisis...');
+          await fetchClaudeAnalysis();
+        } else {
+          console.error('Faltan datos para generar el análisis:', {
+            valueData: !!valueData,
+            growthData: !!growthData,
+            bondsData: !!data
+          });
+          setError('No se pudieron cargar todos los datos necesarios. Por favor, inténtalo de nuevo.');
+        }
+      }
+    } catch (error) {
+      console.error('Error al obtener bonos:', error);
+      setError(`Error al obtener los bonos: ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Pedir análisis SOLO cuando los tres están listos
   const fetchClaudeAnalysis = async () => {
     console.log('Iniciando fetchClaudeAnalysis...');
     
@@ -286,36 +226,6 @@ function App() {
     }
   };
 
-  // Manejador del formulario inicial
-  const handleFormSubmit = (data) => {
-    setFormData(data);
-    setStep(1); // Ir al primer paso (Value)
-  };
-
-  // Manejadores para los botones secuenciales
-  const handleFetchValue = async () => {
-    const data = await fetchPortfolio('value');
-    if (data) {
-      setValueData(data);
-      setStep(2); // Ir al siguiente paso (Growth)
-    }
-  };
-  
-  const handleFetchGrowth = async () => {
-    const data = await fetchPortfolio('growth');
-    if (data) {
-      setGrowthData(data);
-      setStep(3); // Ir al siguiente paso (Bonds)
-    }
-  };
-  
-  const handleFetchBonds = async () => {
-    try {
-      setLoading(true);
-      const data = await fetchPortfolio('bonds');
-      if (data) {
-        setBondsData(data);
-        setStep(4); // Ir al paso final (Mostrar resultados)
         
         // Verificar que todos los datos necesarios estén disponibles
         if (valueData && growthData) {
