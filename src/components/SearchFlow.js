@@ -21,7 +21,7 @@ const SearchFlow = ({ amount, horizon, onSearchComplete }) => {
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
 
-  const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
+  const BASE_URL = (window.REACT_APP_BACKEND_URL || 'https://value-investing-5b425882ff1a.herokuapp.com').replace(/\/$/, '');
 
   const handleSearch = async (type) => {
     try {

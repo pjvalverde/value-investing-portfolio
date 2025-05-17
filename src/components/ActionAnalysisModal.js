@@ -19,7 +19,7 @@ export default function ActionAnalysisModal({ open, onClose, action, analysis, m
     setLoading(true);
     setError('');
     try {
-      const BASE_URL = process.env.REACT_APP_BACKEND_URL.replace(/\/$/, '');
+      const BASE_URL = (window.REACT_APP_BACKEND_URL || 'https://value-investing-5b425882ff1a.herokuapp.com').replace(/\/$/, '');
       const res = await fetch(`${BASE_URL}/historical_prices?ticker=${action.ticker}&period=1year`);
       
       if (!res.ok) throw new Error('No se pudieron obtener datos históricos');
