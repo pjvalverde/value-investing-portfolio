@@ -118,7 +118,6 @@ const PortfolioResults = ({ portfolio, amount }) => {
           </table>
         </div>
       </div>
-    </div>
       {/* Botón para métricas de Claude y modal */}
       <ClaudeMetricsModal analysisClaude={portfolio.analysisClaude} />
     </div>
