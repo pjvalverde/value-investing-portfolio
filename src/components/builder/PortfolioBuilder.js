@@ -108,6 +108,7 @@ const PortfolioBuilder = () => {
   };
 
   // Paso 6: Buscar Bonos
+  const fetchBonds = async () => {
     setLoading(true); setError('');
     try {
       const amount = parseFloat(formData.amount) * (parseInt(formData.allocation.bonds) / 100);
