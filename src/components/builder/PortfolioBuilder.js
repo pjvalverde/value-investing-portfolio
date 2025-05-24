@@ -10,7 +10,8 @@ const PortfolioBuilder = () => {
     allocation: {
       bonds: 25,
       value: 50,
-      growth: 25
+      growth: 15,
+      disruptive: 10
     }
   });
   const [loading, setLoading] = useState(false);
@@ -171,7 +172,12 @@ const PortfolioBuilder = () => {
           <label>Value %: <input type="number" value={formData.allocation.value} onChange={e => handleAllocationChange('value', e.target.value)} /></label>
           <label>Growth %: <input type="number" value={formData.allocation.growth} onChange={e => handleAllocationChange('growth', e.target.value)} /></label>
           <label>Bonds %: <input type="number" value={formData.allocation.bonds} onChange={e => handleAllocationChange('bonds', e.target.value)} /></label>
-          <button onClick={() => setStep(3)} className="optimize-button">Siguiente</button>
+          <label>Disruptive %: <input type="number" value={formData.allocation.disruptive} onChange={e => handleAllocationChange('disruptive', e.target.value)} /></label>
+          <div style={{margin:'8px 0',color:(parseInt(formData.allocation.value||0)+parseInt(formData.allocation.growth||0)+parseInt(formData.allocation.bonds||0)+parseInt(formData.allocation.disruptive||0)===100?'green':'red')}}>
+            Suma total: {parseInt(formData.allocation.value||0)+parseInt(formData.allocation.growth||0)+parseInt(formData.allocation.bonds||0)+parseInt(formData.allocation.disruptive||0)}%
+            {parseInt(formData.allocation.value||0)+parseInt(formData.allocation.growth||0)+parseInt(formData.allocation.bonds||0)+parseInt(formData.allocation.disruptive||0)!==100 && ' (Debe sumar 100%)'}
+          </div>
+          <button onClick={() => setStep(3)} className="optimize-button" disabled={parseInt(formData.allocation.value||0)+parseInt(formData.allocation.growth||0)+parseInt(formData.allocation.bonds||0)+parseInt(formData.allocation.disruptive||0)!==100}>Siguiente</button>
         </div>
       )}
       {step === 3 && (
