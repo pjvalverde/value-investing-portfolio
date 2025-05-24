@@ -146,6 +146,17 @@ const PortfolioBuilder = () => {
     // eslint-disable-next-line
   }, [step]);
 
+  // Actualiza finalPortfolio cuando analysisClaude cambia (y estamos en paso 7)
+  useEffect(() => {
+    if (step === 7 && finalPortfolio && analysisClaude) {
+      setFinalPortfolio(prev => ({
+        ...prev,
+        analysisClaude
+      }));
+    }
+    // eslint-disable-next-line
+  }, [analysisClaude]);
+
   // Análisis Claude
   const fetchClaudeAnalysis = async () => {
     setAnalysisLoading(true);
