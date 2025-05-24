@@ -263,14 +263,13 @@ const PortfolioBuilder = () => {
       {step === 7 && finalPortfolio && (
         <div className="step-container">
           <h2>Tu Portafolio Combinado</h2>
-          <PortfolioResults portfolio={finalPortfolio} amount={formData.amount} />
+          <PortfolioResults 
+            portfolio={finalPortfolio} 
+            amount={formData.amount} 
+            analysisClaude={analysisClaude}
+          />
           {analysisLoading ? (
             <div style={{margin:'12px 0',color:'#3b5998'}}>Generando análisis cualitativo con Claude...</div>
-          ) : analysisClaude ? (
-            <div style={{margin:'12px 0',background:'#f6f8fa',padding:12,borderRadius:6}}>
-              <b>Análisis Claude:</b>
-              <div dangerouslySetInnerHTML={{ __html: analysisClaude }} />
-            </div>
           ) : null}
           <div className="buttons-container">
             <button className="back-button" onClick={() => setStep(2)}>
@@ -278,6 +277,9 @@ const PortfolioBuilder = () => {
             </button>
             <button className="save-button" onClick={() => alert('Funcionalidad de guardar portfolio en desarrollo')}>
               Guardar Portfolio
+            </button>
+            <button className="back-button" onClick={() => setStep(1)}>
+              Volver al inicio
             </button>
           </div>
         </div>
