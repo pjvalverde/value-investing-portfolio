@@ -10,7 +10,8 @@ const PortfolioResults = ({ portfolio, amount }) => {
   const positions = [
     ...(allocation.value || []).map(item => ({ ...item, bucket: 'value' })),
     ...(allocation.growth || []).map(item => ({ ...item, bucket: 'growth' })),
-    ...(allocation.bonds || []).map(item => ({ ...item, bucket: 'bonds' }))
+    ...(allocation.bonds || []).map(item => ({ ...item, bucket: 'bonds' })),
+    ...(allocation.disruptive || []).map(item => ({ ...item, bucket: 'disruptive' }))
   ];
   const bucketData = positions.reduce((acc, position) => {
     const bucket = position.bucket || 'otros';
@@ -26,6 +27,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
     bonds: '#4a6fa5',
     value: '#68b7a0',
     growth: '#f1c40f',
+    disruptive: '#ff6f61',
     otros: '#9b59b6'
   };
   const formatMoney = (amount) => {

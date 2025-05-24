@@ -8,9 +8,10 @@ const PortfolioBuilder = () => {
     amount: 10000,
     horizon: 'largo',
     allocation: {
-      bonds: 25,
-      value: 50,
-      growth: 25
+      bonds: 20,
+      value: 30,
+      growth: 30,
+      disruptive: 20
     }
   });
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,7 @@ const PortfolioBuilder = () => {
   const [portfolioValue, setPortfolioValue] = useState(null);
   const [portfolioGrowth, setPortfolioGrowth] = useState(null);
   const [portfolioBonds, setPortfolioBonds] = useState(null);
+  const [portfolioDisruptive, setPortfolioDisruptive] = useState(null);
   const [finalPortfolio, setFinalPortfolio] = useState(null);
   const [analysisClaude, setAnalysisClaude] = useState('');
   const [analysisLoading, setAnalysisLoading] = useState(false);
@@ -85,8 +87,27 @@ const PortfolioBuilder = () => {
     }
   };
 
-  // Paso 5: Buscar Bonos
-  const fetchBonds = async () => {
+  // Paso 5: Buscar Disruptivas
+  const fetchDisruptive = async () => {
+    setLoading(true); setError('');
+    try {
+      const amount = parseFloat(formData.amount) * (parseInt(formData.allocation.disruptive) / 100);
+      const response = await fetch(`${BASE_URL}/api/portfolio/disruptive`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount })
+      });
+      if (!response.ok) throw new Error(await response.text());
+      setPortfolioDisruptive(await response.json());
+      setStep(6); // Paso final: análisis Claude
+    } catch (err) {
+      setError(err.message || 'Error al buscar Disruptivas');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Paso 6: Buscar Bonos
     setLoading(true); setError('');
     try {
       const amount = parseFloat(formData.amount) * (parseInt(formData.allocation.bonds) / 100);
@@ -107,11 +128,12 @@ const PortfolioBuilder = () => {
 
   // Paso 6: Ensamblar portafolio final
   useEffect(() => {
-    if (step === 6) {
+    if (step === 7) {
       let allocation = {};
       if (portfolioValue && portfolioValue.allocation) allocation.value = portfolioValue.allocation;
       if (portfolioGrowth && portfolioGrowth.allocation) allocation.growth = portfolioGrowth.allocation;
       if (portfolioBonds && portfolioBonds.allocation) allocation.bonds = portfolioBonds.allocation;
+      if (portfolioDisruptive && portfolioDisruptive.allocation) allocation.disruptive = portfolioDisruptive.allocation;
       const final = {
         allocation,
         metrics: {},
@@ -171,6 +193,7 @@ const PortfolioBuilder = () => {
           <label>Value %: <input type="number" value={formData.allocation.value} onChange={e => handleAllocationChange('value', e.target.value)} /></label>
           <label>Growth %: <input type="number" value={formData.allocation.growth} onChange={e => handleAllocationChange('growth', e.target.value)} /></label>
           <label>Bonds %: <input type="number" value={formData.allocation.bonds} onChange={e => handleAllocationChange('bonds', e.target.value)} /></label>
+          <label>Disruptivas %: <input type="number" value={formData.allocation.disruptive} onChange={e => handleAllocationChange('disruptive', e.target.value)} /></label>
           <button onClick={() => setStep(3)} className="optimize-button">Siguiente</button>
         </div>
       )}
@@ -184,7 +207,7 @@ const PortfolioBuilder = () => {
             <div>
               <p>¿Quieres agregar acciones Growth?</p>
               <button onClick={() => setStep(4)} className="optimize-button">Sí, agregar Growth</button>
-              <button onClick={() => setStep(5)} className="back-button">No, ir a Bonos/ETFs</button>
+              <button onClick={() => setStep(5)} className="back-button">No, ir a Disruptivas</button>
             </div>
           )}
           {error && <div className="error-message">{error}</div>}
@@ -198,9 +221,9 @@ const PortfolioBuilder = () => {
           </button>
           {portfolioGrowth && (
             <div>
-              <p>¿Quieres agregar Bonos/ETFs?</p>
-              <button onClick={() => setStep(5)} className="optimize-button">Sí, agregar Bonos/ETFs</button>
-              <button onClick={() => setStep(6)} className="back-button">No, ver análisis final</button>
+              <p>¿Quieres agregar Disruptivas?</p>
+              <button onClick={() => setStep(5)} className="optimize-button">Sí, agregar Disruptivas</button>
+              <button onClick={() => setStep(6)} className="back-button">No, ir a Bonos/ETFs</button>
             </div>
           )}
           {error && <div className="error-message">{error}</div>}
@@ -208,19 +231,35 @@ const PortfolioBuilder = () => {
       )}
       {step === 5 && (
         <div className="step-container">
-          <h2>Paso 5: Buscar Bonos/ETFs</h2>
-          <button onClick={fetchBonds} disabled={loading} className="optimize-button">
-            {loading ? 'Buscando Bonos/ETFs...' : 'Buscar Bonos/ETFs'}
+          <h2>Paso 5: Buscar Disruptivas</h2>
+          <button onClick={fetchDisruptive} disabled={loading} className="optimize-button">
+            {loading ? 'Buscando Disruptivas...' : 'Buscar Disruptivas'}
           </button>
-          {portfolioBonds && (
+          {portfolioDisruptive && (
             <div>
-              <button onClick={() => setStep(6)} className="optimize-button">Ver análisis final</button>
+              <p>¿Quieres agregar Bonos/ETFs?</p>
+              <button onClick={() => setStep(6)} className="optimize-button">Sí, agregar Bonos/ETFs</button>
+              <button onClick={() => setStep(7)} className="back-button">No, ver análisis final</button>
             </div>
           )}
           {error && <div className="error-message">{error}</div>}
         </div>
       )}
-      {step === 6 && finalPortfolio && (
+      {step === 6 && (
+        <div className="step-container">
+          <h2>Paso 6: Buscar Bonos/ETFs</h2>
+          <button onClick={fetchBonds} disabled={loading} className="optimize-button">
+            {loading ? 'Buscando Bonos/ETFs...' : 'Buscar Bonos/ETFs'}
+          </button>
+          {portfolioBonds && (
+            <div>
+              <button onClick={() => setStep(7)} className="optimize-button">Ver análisis final</button>
+            </div>
+          )}
+          {error && <div className="error-message">{error}</div>}
+        </div>
+      )}
+      {step === 7 && finalPortfolio && (
         <div className="step-container">
           <h2>Tu Portafolio Combinado</h2>
           <PortfolioResults portfolio={finalPortfolio} amount={formData.amount} />
