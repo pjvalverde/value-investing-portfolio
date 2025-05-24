@@ -1,0 +1,52 @@
+.claude-analysis-markdown {
+  margin-top: 12px;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+.claude-analysis-text {
+  margin-bottom: 18px;
+  font-size: 1.08em;
+  color: #222;
+}
+.claude-analysis-table-wrapper {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+.claude-analysis-table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(44,62,80,0.09);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.claude-analysis-table-wrapper th, .claude-analysis-table-wrapper td {
+  border: 1px solid #e1e4e8;
+  padding: 10px 8px;
+  text-align: left;
+  font-size: 1em;
+  min-width: 80px;
+  word-break: break-word;
+  white-space: pre-line;
+}
+
+/* Específico para la columna Métricas clave */
+.claude-analysis-table-wrapper td:last-child {
+  min-width: 180px;
+  max-width: 340px;
+  color: #1a237e;
+  font-weight: 500;
+  background: #f3f7fa;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  white-space: pre-line;
+}
+.claude-analysis-table-wrapper th {
+  background: #3b5998;
+  color: #fff;
+  font-weight: 600;
+}
+.claude-analysis-table-wrapper tr:nth-child(even) {
+  background: #f6f8fa;
+}
+.claude-analysis-table-wrapper tr:hover {
+  background: #eaf1fb;
+}

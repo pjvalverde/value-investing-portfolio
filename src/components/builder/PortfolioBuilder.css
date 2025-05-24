@@ -1,0 +1,74 @@
+.portfolio-builder {
+  margin: 0 auto;
+  max-width: 800px;
+  background: #fafbfc;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px #0001;
+  padding: 32px 24px 32px 24px;
+}
+
+.step-container {
+  margin-bottom: 32px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px 20px;
+  box-shadow: 0 1px 6px #0002;
+}
+
+.optimize-button, .back-button, .save-button {
+  background: #3b5998;
+  color: white;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin: 8px 8px 0 0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.optimize-button:hover, .save-button:hover {
+  background: #2d4373;
+}
+.back-button {
+  background: #888;
+}
+.back-button:hover {
+  background: #555;
+}
+
+label {
+  display: block;
+  margin: 12px 0 6px 0;
+  font-weight: 500;
+}
+input[type="number"], select {
+  margin-left: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+}
+
+.error-message {
+  color: #b00020;
+  background: #ffdada;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin-top: 14px;
+}
+
+.buttons-container {
+  margin-top: 18px;
+}
+
+@media (max-width: 600px) {
+  .portfolio-builder {
+    padding: 10px;
+  }
+  .step-container {
+    padding: 12px 5px;
+  }
+  .optimize-button, .back-button, .save-button {
+    width: 100%;
+    margin: 6px 0;
+  }
+}
