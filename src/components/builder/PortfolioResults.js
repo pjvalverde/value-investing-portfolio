@@ -41,7 +41,9 @@ const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
   const cash = amount - totalInvested;
   return (
     <div className="portfolio-results">
-      <div className="results-summary">
+      <div className="results-visualization">
+        <div>
+          <div className="results-summary">
         <div className="summary-item">
           <h3>Monto Total</h3>
           <p className="summary-value">{formatMoney(amount)}</p>
@@ -118,9 +120,9 @@ const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
           </table>
         </div>
       </div>
-      {/* Análisis de Claude (siempre visible, primitivo) */}
+      {/* Panel de análisis de Claude a la derecha */}
       { (portfolio.analysisClaude || analysisClaude) && (
-        <div style={{margin:'24px 0',padding:'16px',border:'1px solid #ddd',borderRadius:'8px',background:'#fafafa'}}>
+        <div className="analysis-claude-panel">
           <h3>Análisis Claude</h3>
           <div style={{whiteSpace:'pre-wrap'}}>
             {typeof (portfolio.analysisClaude || analysisClaude) === 'string'
