@@ -139,6 +139,7 @@ const PortfolioBuilder = () => {
         allocation,
         metrics: {},
         source: 'combinado',
+        analysisClaude // <--- ahora analysisClaude va dentro de portfolio
       };
       setFinalPortfolio(final);
     }
