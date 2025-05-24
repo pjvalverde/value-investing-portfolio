@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import './PortfolioResults.css';
 
@@ -8,10 +8,10 @@ const PortfolioResults = ({ portfolio, amount }) => {
   }
   const { allocation, metrics } = portfolio;
   const positions = [
-    ...(Array.isArray(allocation.value) ? allocation.value : []).map(item => ({ ...item, bucket: 'value' })),
-    ...(Array.isArray(allocation.growth) ? allocation.growth : []).map(item => ({ ...item, bucket: 'growth' })),
-    ...(Array.isArray(allocation.bonds) ? allocation.bonds : []).map(item => ({ ...item, bucket: 'bonds' })),
-    ...(Array.isArray(allocation.disruptive) ? allocation.disruptive : []).map(item => ({ ...item, bucket: 'disruptive' }))
+    ...(allocation.value || []).map(item => ({ ...item, bucket: 'value' })),
+    ...(allocation.growth || []).map(item => ({ ...item, bucket: 'growth' })),
+    ...(allocation.bonds || []).map(item => ({ ...item, bucket: 'bonds' })),
+    ...(allocation.disruptive || []).map(item => ({ ...item, bucket: 'disruptive' }))
   ];
   const bucketData = positions.reduce((acc, position) => {
     const bucket = position.bucket || 'otros';
@@ -27,7 +27,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
     bonds: '#4a6fa5',
     value: '#68b7a0',
     growth: '#f1c40f',
-    disruptive: '#ff7f50',
+    disruptive: '#ff6f61',
     otros: '#9b59b6'
   };
   const formatMoney = (amount) => {
@@ -119,6 +119,54 @@ const PortfolioResults = ({ portfolio, amount }) => {
         </div>
       </div>
     </div>
+      {/* Botón para métricas de Claude y modal */}
+      <ClaudeMetricsModal analysisClaude={portfolio.analysisClaude} />
+    </div>
+  );
+};
+
+// Modal para métricas de Claude
+const ClaudeMetricsModal = ({ analysisClaude }) => {
+  const [open, setOpen] = useState(false);
+  if (!analysisClaude) return null;
+  let metrics = null;
+  try {
+    const match = analysisClaude.match(/<pre.*?>([\s\S]*?)<\/pre>/);
+    if (match) {
+      metrics = JSON.parse(match[1]);
+    }
+  } catch (e) { metrics = null; }
+  if (!metrics) return null;
+  return (
+    <>
+      <button className="optimize-button" style={{margin:'18px 0 0 0'}} onClick={()=>setOpen(true)}>
+        Ver métricas de Claude
+      </button>
+      {open && (
+        <div className="modal-overlay" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.4)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}}>
+          <div className="modal-content" style={{background:'#fff',padding:24,borderRadius:8,minWidth:320,position:'relative',boxShadow:'0 2px 16px rgba(0,0,0,0.15)'}}>
+            <button
+              style={{position:'absolute',top:8,right:12,fontSize:22,border:'none',background:'none',cursor:'pointer'}}
+              onClick={()=>setOpen(false)}
+              aria-label="Cerrar"
+            >×</button>
+            <h3 style={{marginTop:0}}>Métricas de Claude</h3>
+            <table className="claude-metrics-table" style={{width:'100%',marginTop:12}}>
+              <thead>
+                <tr>
+                  {Object.keys(metrics).map((k,i) => <th key={i}>{k}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  {Object.values(metrics).map((v,i) => <td key={i}>{v}</td>)}
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
