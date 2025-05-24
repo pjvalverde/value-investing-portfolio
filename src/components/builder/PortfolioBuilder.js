@@ -245,6 +245,9 @@ const PortfolioBuilder = () => {
             <button className="save-button" onClick={() => alert('Funcionalidad de guardar portfolio en desarrollo')}>
               Guardar Portfolio
             </button>
+            <button className="home-button" style={{marginLeft:8}} onClick={() => setStep(1)}>
+              Volver al inicio
+            </button>
           </div>
         </div>
       )}
