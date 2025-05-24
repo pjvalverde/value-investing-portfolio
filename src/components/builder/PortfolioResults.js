@@ -106,7 +106,15 @@ const PortfolioResults = ({ portfolio, amount }) => {
               {positions.map((position, index) => (
                 <tr key={index} className={`row-${position.bucket}`}>
                   <td>{position.ticker}</td>
-                  <td>{position.bucket}</td>
+                  <td>
+                    {position.bucket === 'disruptive' ? (
+                      <span style={{ background: '#ffe066', color: '#b8860b', padding: '2px 8px', borderRadius: '8px', fontWeight: 'bold' }}>
+                        Disruptivo
+                      </span>
+                    ) : (
+                      position.bucket
+                    )}
+                  </td>
                   <td>{position.shares}</td>
                   <td>{formatMoney(position.price)}</td>
                   <td>{formatMoney(position.amount)}</td>
