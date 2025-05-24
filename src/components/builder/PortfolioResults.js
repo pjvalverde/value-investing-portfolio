@@ -129,17 +129,18 @@ const ClaudeMetricsModal = ({ analysisClaude }) => {
   const [open, setOpen] = useState(false);
   if (!analysisClaude) return null;
   let metrics = null;
+  let analysisHtml = analysisClaude;
   try {
     const match = analysisClaude.match(/<pre.*?>([\s\S]*?)<\/pre>/);
     if (match) {
       metrics = JSON.parse(match[1]);
+      analysisHtml = analysisClaude.replace(match[0], '');
     }
   } catch (e) { metrics = null; }
-  if (!metrics) return null;
   return (
     <>
       <button className="optimize-button" style={{margin:'18px 0 0 0'}} onClick={()=>setOpen(true)}>
-        Ver métricas de Claude
+        Ver análisis Claude
       </button>
       {open && (
         <div className="modal-overlay" style={{position:'fixed',top:0,left:0,width:'100vw',height:'100vh',background:'rgba(0,0,0,0.4)',zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}}>
@@ -149,19 +150,25 @@ const ClaudeMetricsModal = ({ analysisClaude }) => {
               onClick={()=>setOpen(false)}
               aria-label="Cerrar"
             >×</button>
-            <h3 style={{marginTop:0}}>Métricas de Claude</h3>
-            <table className="claude-metrics-table" style={{width:'100%',marginTop:12}}>
-              <thead>
-                <tr>
-                  {Object.keys(metrics).map((k,i) => <th key={i}>{k}</th>)}
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  {Object.values(metrics).map((v,i) => <td key={i}>{v}</td>)}
-                </tr>
-              </tbody>
-            </table>
+            <h3 style={{marginTop:0}}>Análisis Claude</h3>
+            <div style={{margin:'12px 0'}}>
+              <div style={{whiteSpace:'pre-wrap'}} dangerouslySetInnerHTML={{__html: analysisHtml}} />
+            </div>
+            {metrics && <>
+              <h4 style={{marginTop:16}}>Métricas detectadas</h4>
+              <table className="claude-metrics-table" style={{width:'100%',marginTop:12}}>
+                <thead>
+                  <tr>
+                    {Object.keys(metrics).map((k,i) => <th key={i}>{k}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    {Object.values(metrics).map((v,i) => <td key={i}>{v}</td>)}
+                  </tr>
+                </tbody>
+              </table>
+            </>}
           </div>
         </div>
       )}
