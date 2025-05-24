@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PortfolioResults from './PortfolioResults';
+import ClaudeAnalysis from './ClaudeAnalysis';
 import './PortfolioBuilder.css';
 
 const PortfolioBuilder = () => {
@@ -235,7 +236,7 @@ const PortfolioBuilder = () => {
           ) : analysisClaude ? (
             <div style={{margin:'12px 0',background:'#f6f8fa',padding:12,borderRadius:6}}>
               <b>Análisis Claude:</b>
-              <div dangerouslySetInnerHTML={{ __html: analysisClaude }} />
+              <ClaudeAnalysis analysis={analysisClaude} />
             </div>
           ) : null}
           <div className="buttons-container">
