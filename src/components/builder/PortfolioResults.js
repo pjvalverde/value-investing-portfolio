@@ -118,8 +118,13 @@ const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
           </table>
         </div>
       </div>
-      {/* Botón para métricas de Claude y modal */}
-      <ClaudeMetricsModal analysisClaude={portfolio.analysisClaude || analysisClaude} />
+      {/* Análisis de Claude (siempre visible, primitivo) */}
+      { (portfolio.analysisClaude || analysisClaude) && (
+        <div style={{margin:'24px 0',padding:'16px',border:'1px solid #ddd',borderRadius:'8px',background:'#fafafa'}}>
+          <h3>Análisis Claude</h3>
+          <div style={{whiteSpace:'pre-wrap'}} dangerouslySetInnerHTML={{__html: portfolio.analysisClaude || analysisClaude}} />
+        </div>
+      ) }
     </div>
   );
 };
