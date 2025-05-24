@@ -122,7 +122,12 @@ const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
       { (portfolio.analysisClaude || analysisClaude) && (
         <div style={{margin:'24px 0',padding:'16px',border:'1px solid #ddd',borderRadius:'8px',background:'#fafafa'}}>
           <h3>Análisis Claude</h3>
-          <div style={{whiteSpace:'pre-wrap'}} dangerouslySetInnerHTML={{__html: portfolio.analysisClaude || analysisClaude}} />
+          <div style={{whiteSpace:'pre-wrap'}}>
+            {typeof (portfolio.analysisClaude || analysisClaude) === 'string'
+              ? <span dangerouslySetInnerHTML={{__html: portfolio.analysisClaude || analysisClaude}} />
+              : <pre>{JSON.stringify(portfolio.analysisClaude || analysisClaude, null, 2)}</pre>
+            }
+          </div>
         </div>
       ) }
     </div>
