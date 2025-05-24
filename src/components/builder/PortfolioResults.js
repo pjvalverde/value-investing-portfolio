@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import './PortfolioResults.css';
 
-const PortfolioResults = ({ portfolio, amount }) => {
+const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
   if (!portfolio || !portfolio.allocation) {
     return <div className="portfolio-results">No hay datos de portfolio disponibles</div>;
   }
@@ -119,7 +119,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
         </div>
       </div>
       {/* Botón para métricas de Claude y modal */}
-      <ClaudeMetricsModal analysisClaude={portfolio.analysisClaude} />
+      <ClaudeMetricsModal analysisClaude={portfolio.analysisClaude || analysisClaude} />
     </div>
   );
 };
