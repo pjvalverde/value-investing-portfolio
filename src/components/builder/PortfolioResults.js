@@ -101,7 +101,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
                 <th>Acciones</th>
                 <th>Precio</th>
                 <th>Valor</th>
-                <th>Métricas clave</th>
+                
               </tr>
             </thead>
             <tbody>
@@ -112,17 +112,7 @@ const PortfolioResults = ({ portfolio, amount }) => {
                   <td>{position.shares}</td>
                   <td>{formatMoney(position.price)}</td>
                   <td>{formatMoney(position.amount)}</td>
-                  <td>
-                    {position.metrics && Object.keys(position.metrics).length > 0 ? (
-                      <ul style={{margin:0,paddingLeft:16}}>
-                        {Object.entries(position.metrics).map(([key, value]) => (
-                          <li key={key}><b>{key}:</b> {String(value)}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      '-'
-                    )}
-                  </td>
+                  
                 </tr>
               ))}
             </tbody>
