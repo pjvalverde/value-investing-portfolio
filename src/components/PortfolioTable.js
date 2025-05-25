@@ -17,6 +17,7 @@ const PortfolioTable = ({ portfolio = [] }) => {
             <th>Cantidad</th>
             <th>Inversión total</th>
             <th>Recomendación</th>
+            <th>Métricas clave</th>
           </tr>
         </thead>
         <tbody>
@@ -30,6 +31,17 @@ const PortfolioTable = ({ portfolio = [] }) => {
               <td>{row.cantidad ?? '-'}</td>
               <td>{row.inversion ? `$${row.inversion}` : '-'}</td>
               <td><span style={{background: row.recomendacion === 'Comprar' ? '#8fd6b4' : '#e7e7e7', padding: '2px 8px', borderRadius: 6}}>{row.recomendacion}</span></td>
+              <td>
+                {row.metrics && Object.keys(row.metrics).length > 0 ? (
+                  <ul style={{margin:0,paddingLeft:16}}>
+                    {Object.entries(row.metrics).map(([key, value]) => (
+                      <li key={key}><b>{key}:</b> {String(value)}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  '-'
+                )}
+              </td>
             </tr>
           ))}
         </tbody>
