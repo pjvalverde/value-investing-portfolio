@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import './PortfolioResults.css';
+import AntifragilePanel from './AntifragilePanel';
 
 const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
   if (!portfolio || !portfolio.allocation) {
@@ -120,6 +121,9 @@ const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
           </table>
         </div>
       </div>
+
+      <AntifragilePanel portfolio={portfolio} amount={amount} />
+
       {/* Panel de análisis de Claude a la derecha */}
       { (portfolio.analysisClaude || analysisClaude) && (
         <div className="analysis-claude-panel">
@@ -137,6 +141,7 @@ const PortfolioResults = ({ portfolio, amount, analysisClaude }) => {
 };
 
 // Modal para métricas de Claude
+/*
 const ClaudeMetricsModal = ({ analysisClaude }) => {
   const [open, setOpen] = useState(false);
   if (!analysisClaude) return null;
@@ -187,5 +192,6 @@ const ClaudeMetricsModal = ({ analysisClaude }) => {
     </>
   );
 };
+*/
 
 export default PortfolioResults;
