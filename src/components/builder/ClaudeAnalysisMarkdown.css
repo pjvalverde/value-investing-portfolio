@@ -1,52 +1,151 @@
+/* ClaudeAnalysisMarkdown.css — Professional AI Analysis Styling */
+
 .claude-analysis-markdown {
-  margin-top: 12px;
-  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  font-family: -apple-system, 'Segoe UI', 'Inter', sans-serif;
+  color: #2D3748;
+  line-height: 1.7;
+  font-size: 0.9rem;
 }
-.claude-analysis-text {
-  margin-bottom: 18px;
-  font-size: 1.08em;
-  color: #222;
+
+/* Headings */
+.claude-analysis-markdown h1,
+.claude-analysis-markdown h2 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0D1B2A;
+  margin: 20px 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid #E2E8F0;
 }
+
+.claude-analysis-markdown h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1B4F72;
+  margin: 16px 0 8px;
+}
+
+.claude-analysis-markdown h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #2D3748;
+  margin: 12px 0 6px;
+}
+
+/* Paragraphs */
+.claude-analysis-markdown p {
+  margin: 0 0 12px;
+  color: #2D3748;
+}
+
+/* Strong / em */
+.claude-analysis-markdown strong { color: #0D1B2A; font-weight: 700; }
+.claude-analysis-markdown em     { color: #1B4F72; font-style: italic; }
+
+/* Lists */
+.claude-analysis-markdown ul,
+.claude-analysis-markdown ol {
+  padding-left: 20px;
+  margin: 8px 0 12px;
+}
+
+.claude-analysis-markdown li {
+  margin-bottom: 5px;
+  color: #2D3748;
+}
+
+/* Blockquote */
+.claude-analysis-markdown blockquote {
+  border-left: 3px solid #C9A84C;
+  margin: 12px 0;
+  padding: 8px 16px;
+  background: #FEFDF0;
+  border-radius: 0 8px 8px 0;
+  color: #744210;
+  font-style: italic;
+}
+
+/* Code */
+.claude-analysis-markdown code {
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
+  font-size: 0.83rem;
+  background: #EBF8FF;
+  color: #1B4F72;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.claude-analysis-markdown pre {
+  background: #F7FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 14px;
+  overflow-x: auto;
+  margin: 12px 0;
+}
+
+.claude-analysis-markdown pre code {
+  background: none;
+  color: #2D3748;
+  padding: 0;
+}
+
+/* ── Table ── */
 .claude-analysis-table-wrapper {
   overflow-x: auto;
-  margin-top: 8px;
+  margin: 14px 0;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 2px 8px rgba(13,27,42,0.06);
 }
+
 .claude-analysis-table-wrapper table {
   width: 100%;
   border-collapse: collapse;
   background: #fff;
-  box-shadow: 0 2px 12px rgba(44,62,80,0.09);
-  border-radius: 8px;
-  overflow: hidden;
-}
-.claude-analysis-table-wrapper th, .claude-analysis-table-wrapper td {
-  border: 1px solid #e1e4e8;
-  padding: 10px 8px;
-  text-align: left;
-  font-size: 1em;
-  min-width: 80px;
-  word-break: break-word;
-  white-space: pre-line;
+  min-width: 500px;
 }
 
-/* Específico para la columna Métricas clave */
-.claude-analysis-table-wrapper td:last-child {
-  min-width: 180px;
-  max-width: 340px;
-  color: #1a237e;
-  font-weight: 500;
-  background: #f3f7fa;
-  font-family: 'Fira Mono', 'Consolas', 'Menlo', monospace;
-  white-space: pre-line;
-}
-.claude-analysis-table-wrapper th {
-  background: #3b5998;
+.claude-analysis-table-wrapper thead th {
+  background: #0D1B2A;
   color: #fff;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #1B4F72;
+  white-space: nowrap;
 }
-.claude-analysis-table-wrapper tr:nth-child(even) {
-  background: #f6f8fa;
+
+.claude-analysis-table-wrapper tbody td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #F7FAFC;
+  font-size: 0.83rem;
+  color: #2D3748;
+  vertical-align: top;
+  word-break: break-word;
+  white-space: pre-line;
+  min-width: 80px;
 }
-.claude-analysis-table-wrapper tr:hover {
-  background: #eaf1fb;
+
+.claude-analysis-table-wrapper tbody td:first-child {
+  font-weight: 700;
+  color: #0D1B2A;
 }
+
+/* Last column (metrics) */
+.claude-analysis-table-wrapper tbody td:last-child {
+  min-width: 180px;
+  max-width: 280px;
+  font-family: 'Fira Mono', 'Consolas', monospace;
+  font-size: 0.78rem;
+  color: #1B4F72;
+  background: #F0F7FF;
+  font-weight: 500;
+}
+
+.claude-analysis-table-wrapper tbody tr:last-child td { border-bottom: none; }
+.claude-analysis-table-wrapper tbody tr:nth-child(even) { background: #FAFCFF; }
+.claude-analysis-table-wrapper tbody tr:hover { background: #EBF8FF; }

@@ -1,0 +1,234 @@
+/* DamodaranPanel.css */
+.dp-root {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #E2E8F0;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.dp-header {
+  margin-bottom: 22px;
+}
+
+.dp-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0D1B2A;
+  margin: 0 0 4px;
+}
+
+.dp-subtitle {
+  font-size: 0.82rem;
+  color: #718096;
+  margin: 0;
+}
+
+/* Concept cards */
+.dp-concepts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 26px;
+}
+
+.dp-concept-card {
+  background: #F7FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.dp-concept-icon {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.dp-concept-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1A202C;
+  margin: 0 0 6px;
+}
+
+.dp-concept-desc {
+  font-size: 0.77rem;
+  color: #4A5568;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* KPI row */
+.dp-kpi-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 26px;
+}
+
+.dp-kpi {
+  flex: 1;
+  min-width: 160px;
+  padding: 16px 18px;
+  border-radius: 10px;
+  border: 1.5px solid;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dp-kpi-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+}
+
+.dp-kpi-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.dp-kpi-sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.dp-kpi.kpi-green {
+  background: #F0FFF4;
+  border-color: #68D391;
+  color: #22543D;
+}
+
+.dp-kpi.kpi-yellow {
+  background: #FFFFF0;
+  border-color: #F6E05E;
+  color: #744210;
+}
+
+.dp-kpi.kpi-red {
+  background: #FFF5F5;
+  border-color: #FC8181;
+  color: #742A2A;
+}
+
+/* Table */
+.dp-table-wrap {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1px solid #E2E8F0;
+  margin-bottom: 16px;
+}
+
+.dp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.83rem;
+  min-width: 780px;
+}
+
+.dp-table thead th {
+  background: #F7FAFC;
+  color: #4A5568;
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 2px solid #E2E8F0;
+  white-space: nowrap;
+}
+
+.dp-table tbody tr {
+  transition: background 0.12s ease;
+  border-bottom: 1px solid #F7FAFC;
+}
+
+.dp-table tbody tr:last-child { border-bottom: none; }
+.dp-table tbody tr:hover { background: #F7FAFC; }
+
+.dp-table td {
+  padding: 11px 14px;
+  vertical-align: middle;
+}
+
+.dp-ticker {
+  white-space: nowrap;
+}
+
+.dp-ticker strong {
+  font-size: 0.9rem;
+  color: #1A202C;
+  display: block;
+}
+
+.dp-price {
+  font-size: 0.72rem;
+  color: #718096;
+  margin-top: 1px;
+}
+
+.dp-num {
+  font-variant-numeric: tabular-nums;
+  color: #2D3748;
+  font-weight: 500;
+}
+
+.dp-pos { color: #276749 !important; font-weight: 700; }
+.dp-neg { color: #C53030 !important; font-weight: 700; }
+
+.dp-intrinsic { color: #1B4F72; font-weight: 600; }
+
+/* Category badges */
+.dp-cat-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.cat-value      { background: #EBF8FF; color: #2B6CB0; }
+.cat-growth     { background: #F0FFF4; color: #276749; }
+.cat-bonds      { background: #FEFCBF; color: #744210; }
+.cat-disruptive { background: #FAF5FF; color: #553C9A; }
+.cat-other      { background: #F7FAFC; color: #4A5568; }
+
+/* Signal badges */
+.dp-signal {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.dp-signal-buy    { background: #C6F6D5; color: #22543D; }
+.dp-signal-hold   { background: #FEFCBF; color: #744210; }
+.dp-signal-watch  { background: #FED7D7; color: #742A2A; }
+.dp-signal-avoid  { background: #FC8181; color: #fff; }
+
+/* Note */
+.dp-note {
+  font-size: 0.72rem;
+  color: #A0AEC0;
+  background: #F7FAFC;
+  border-radius: 8px;
+  padding: 10px 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.dp-empty {
+  text-align: center;
+  padding: 40px;
+  color: #718096;
+}

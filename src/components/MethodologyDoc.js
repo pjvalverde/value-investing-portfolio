@@ -3,132 +3,321 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
 const METRIC_KEYS = [
-  { key: 'P/E Ratio', label: 'P/E Ratio' },
-  { key: 'ROE', label: 'ROE' },
-  { key: 'Margen de Beneficio', label: 'Margen de Beneficio' },
-  { key: 'Ratio de Deuda', label: 'Ratio de Deuda' },
-  { key: 'Crecimiento de FCF', label: 'Crecimiento de FCF' },
-  { key: 'Moat Cualitativo', label: 'Moat Cualitativo' }
+  { key: 'P/E Ratio',          label: 'P/E Ratio',            framework: 'Buffett/Damodaran' },
+  { key: 'ROE',                 label: 'ROE',                   framework: 'Buffett' },
+  { key: 'ROIC',                label: 'ROIC',                  framework: 'Damodaran ★' },
+  { key: 'WACC',                label: 'WACC',                  framework: 'Damodaran ★' },
+  { key: 'EV/EBITDA',           label: 'EV/EBITDA',             framework: 'Damodaran ★' },
+  { key: 'FCF Yield',           label: 'FCF Yield',             framework: 'Damodaran ★' },
+  { key: 'Revenue CAGR 5Y',     label: 'Crecimiento Ingresos',  framework: 'Damodaran ★' },
+  { key: 'Margen de Beneficio', label: 'Margen de Beneficio',   framework: 'Buffett' },
+  { key: 'Ratio de Deuda',      label: 'Ratio de Deuda',        framework: 'Buffett/Munger' },
+  { key: 'Moat Cualitativo',    label: 'Moat Competitivo',      framework: 'Buffett/Munger' },
+  { key: 'Margen de Seguridad', label: 'Margen de Seguridad',   framework: 'Buffett/Damodaran' },
 ];
 
-// Recibe como prop opcional: highlightMetrics (array de strings)
+const Section = ({ title, id, open, onToggle, children }) => (
+  <div className="methodology-section">
+    <h3
+      style={{
+        cursor: 'pointer',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '10px 14px',
+        borderRadius: 8,
+        background: open ? '#0D1B2A' : '#F7FAFC',
+        color: open ? '#fff' : '#2D3748',
+        border: '1px solid #E2E8F0',
+        userSelect: 'none',
+        fontSize: '0.95rem',
+        fontWeight: 700,
+      }}
+      onClick={() => onToggle(id)}
+    >
+      {title}
+      <span style={{ fontSize: '0.8rem', opacity: 0.7 }}>{open ? '▲' : '▼'}</span>
+    </h3>
+    {open && (
+      <div style={{ padding: '16px 4px 8px', lineHeight: 1.65, fontSize: '0.88rem', color: '#2D3748' }}>
+        {children}
+      </div>
+    )}
+  </div>
+);
+
 const MethodologyDoc = ({ highlightMetrics = [] }) => {
   const [openSections, setOpenSections] = useState({});
-  const ref = useRef();
+  const contentRef = useRef();
 
-  const toggleSection = (section) => {
-    setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
-  };
+  const toggleSection = (id) =>
+    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
 
-  // Exportar como PDF
+  /* ── PDF Export ── */
   const exportPDF = async () => {
-    const input = ref.current;
-    const canvas = await html2canvas(input, { scale: 2 });
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgProps = pdf.getImageProperties(imgData);
-    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, (imgProps.height * pageWidth) / imgProps.width);
-    pdf.save('metodologia_value_investing.pdf');
+    // 1. Open all sections
+    const allOpen = {};
+    ['framework', 'damodaran', 'buffett', 'proceso', 'tbills', 'horizonte', 'metricas'].forEach(
+      (s) => (allOpen[s] = true)
+    );
+    setOpenSections(allOpen);
+
+    // 2. Wait for React to re-render
+    await new Promise((r) => setTimeout(r, 600));
+
+    const input = contentRef.current;
+    if (!input) return;
+
+    try {
+      const canvas = await html2canvas(input, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+        allowTaint: true,
+        scrollY: 0,
+        windowWidth: 900,
+      });
+
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+      const margin = 10;
+      const contentW = pageW - 2 * margin;
+
+      // Scale image to fit content width
+      const scaledHeight = (canvas.height * contentW) / canvas.width;
+
+      let yPos = margin;
+      let remainingHeight = scaledHeight;
+      let sourceY = 0;
+      let pageCount = 0;
+
+      while (remainingHeight > 0) {
+        if (pageCount > 0) {
+          pdf.addPage();
+          yPos = margin;
+        }
+        const availH = pageH - 2 * margin;
+        const sliceH = Math.min(remainingHeight, availH);
+        const sourceSlicePx = (sliceH / scaledHeight) * canvas.height;
+
+        // Create a slice canvas for this page
+        const sliceCanvas = document.createElement('canvas');
+        sliceCanvas.width = canvas.width;
+        sliceCanvas.height = Math.ceil(sourceSlicePx);
+        const ctx = sliceCanvas.getContext('2d');
+        ctx.drawImage(canvas, 0, sourceY, canvas.width, Math.ceil(sourceSlicePx),
+          0, 0, canvas.width, Math.ceil(sourceSlicePx));
+
+        const sliceImgData = sliceCanvas.toDataURL('image/png');
+        pdf.addImage(sliceImgData, 'PNG', margin, yPos, contentW, sliceH);
+
+        remainingHeight -= sliceH;
+        sourceY += Math.ceil(sourceSlicePx);
+        pageCount++;
+      }
+
+      pdf.save('metodologia_valueport_ai.pdf');
+    } catch (err) {
+      console.error('PDF export error:', err);
+      alert('Error al exportar PDF. Intenta de nuevo.');
+    }
   };
 
   return (
     <div className="methodology-container">
-      <button onClick={exportPDF} style={{ float: 'right', marginBottom: 12 }}>Exportar como PDF</button>
-      <div className="card" ref={ref}>
-        <h2 className="section-title">Metodología de Selección según Value Investing</h2>
-        {/* Fundamentos */}
-        <div className="methodology-section">
-          <h3 style={{ cursor: 'pointer' }} onClick={() => toggleSection('fundamentos')}>
-            Fundamentos del Value Investing según Buffett y Munger {openSections['fundamentos'] ? '▲' : '▼'}
-          </h3>
-          {openSections['fundamentos'] && (
-            <p>
-              La metodología de selección de acciones implementada en esta aplicación se basa en los principios fundamentales de value investing desarrollados por Warren Buffett y Charlie Munger. Estos principios se centran en identificar empresas de alta calidad a precios razonables, con ventajas competitivas duraderas y gestión competente.
-            </p>
-          )}
-        </div>
-        {/* Proceso de selección */}
-        <div className="methodology-section">
-          <h3 style={{ cursor: 'pointer' }} onClick={() => toggleSection('proceso')}>
-            Proceso de Selección en 5 Pasos {openSections['proceso'] ? '▲' : '▼'}
-          </h3>
-          {openSections['proceso'] && (
-            <>
-              <div className="methodology-step"><h4>1. Filtrado Inicial</h4><p>Se aplicaron filtros cuantitativos para identificar empresas con valoraciones favorables (infravaloradas o a precio justo). Este filtrado inicial redujo el universo de inversión a empresas que cotizan con un descuento respecto a su valor intrínseco o a un precio razonable, proporcionando el margen de seguridad que Buffett considera esencial.</p></div>
-              <div className="methodology-step"><h4>2. Puntuación Value Investing</h4><p>Se asignó una puntuación a cada empresa basada en factores clave como:</p><ul><li><strong>Innovación:</strong> Capacidad de la empresa para mantener ventajas competitivas</li><li><strong>Sostenibilidad:</strong> Estabilidad del modelo de negocio a largo plazo</li><li><strong>Dividendos:</strong> Generación de efectivo y política de retorno al accionista</li><li><strong>Recomendaciones de analistas:</strong> Percepción del mercado sobre la empresa</li><li><strong>Descuento respecto al valor intrínseco:</strong> Margen de seguridad en la valoración</li></ul><p>Adicionalmente, se consideraron métricas como la tendencia de precios y desarrollos corporativos significativos para identificar oportunidades de valor específicas.</p></div>
-              <div className="methodology-step"><h4>3. Diversificación Sectorial</h4><p>Siguiendo el principio de Buffett de "poner todos los huevos en pocas cestas, pero vigilarlas atentamente", se seleccionaron las mejores empresas de cada sector para asegurar una diversificación adecuada sin diluir excesivamente el portfolio. Se limitó a un máximo de 2 empresas por sector para mantener la concentración en las mejores ideas.</p></div>
-              <div className="methodology-step"><h4>4. Diversificación Geográfica</h4><p>Se incluyeron empresas tanto del S&P 500 como del mercado chino para proporcionar exposición internacional. Esta diversificación geográfica permite aprovechar oportunidades de crecimiento en diferentes economías y reduce la dependencia de un solo mercado. Se aseguró una representación mínima del 30% de empresas chinas para garantizar una exposición significativa a este mercado en crecimiento.</p></div>
-              <div className="methodology-step"><h4>5. Selección Final</h4><p>Se eligieron las 10 empresas con mayor puntuación de value investing, manteniendo la diversificación sectorial y geográfica. Esta selección final representa un balance entre concentración en las mejores ideas y diversificación prudente, alineado con la filosofía de Buffett de invertir con convicción pero con margen de seguridad.</p></div>
-            </>
-          )}
-        </div>
+      {/* Export button */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <button
+          onClick={exportPDF}
+          style={{
+            background: '#0D1B2A', color: '#C9A84C',
+            border: '2px solid #C9A84C', borderRadius: 8,
+            padding: '9px 20px', fontWeight: 700, fontSize: '0.85rem',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 7,
+          }}
+        >
+          📄 Exportar PDF
+        </button>
+      </div>
+
+      {/* Content to export */}
+      <div ref={contentRef} style={{ background: '#fff', padding: 24, borderRadius: 12 }}>
+        <h2 className="section-title" style={{ textAlign: 'center', marginBottom: 8 }}>
+          Metodología de Inversión
+        </h2>
+        <p style={{ textAlign: 'center', fontSize: '0.85rem', color: '#718096', marginBottom: 24 }}>
+          Framework combinado: Buffett/Munger + Damodaran · ValuePort AI
+        </p>
+
+        {/* Framework overview */}
+        <Section title="🔬 Framework Combinado: Damodaran + Buffett/Munger"
+          id="framework" open={openSections['framework']} onToggle={toggleSection}>
+          <p>
+            ValuePort AI integra dos escuelas de pensamiento complementarias para construir portafolios
+            superiores al mercado con un perfil de riesgo controlado:
+          </p>
+          <ul style={{ paddingLeft: 20, margin: '10px 0' }}>
+            <li><strong>Warren Buffett &amp; Charlie Munger:</strong> Empresas de alta calidad con moat
+              competitivo duradero, management excelente y precio razonable. "Es mejor comprar una empresa
+              maravillosa a un precio justo que una empresa justa a un precio maravilloso."</li>
+            <li style={{ marginTop: 8 }}><strong>Aswath Damodaran:</strong> Rigor cuantitativo en la
+              valoración. El valor de cualquier activo es el valor presente de sus flujos de caja futuros
+              descontados al coste de capital (WACC). ROIC &gt; WACC = creación de valor real.</li>
+          </ul>
+        </Section>
+
+        {/* Damodaran section */}
+        <Section title="📐 Principios Damodaran: Valoración Cuantitativa"
+          id="damodaran" open={openSections['damodaran']} onToggle={toggleSection}>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <div style={{ background: '#F7FAFC', borderRadius: 8, padding: 14, borderLeft: '3px solid #1B4F72' }}>
+              <h4 style={{ margin: '0 0 6px', color: '#0D1B2A' }}>ROIC vs WACC</h4>
+              <p>
+                El Retorno sobre Capital Invertido (ROIC) debe superar al Coste Medio Ponderado de Capital
+                (WACC). Cuando ROIC &gt; WACC, cada euro de crecimiento crea valor. Cuando ROIC &lt; WACC,
+                el crecimiento destruye valor. Buscamos un spread ROIC–WACC positivo y creciente.
+              </p>
+            </div>
+            <div style={{ background: '#F7FAFC', borderRadius: 8, padding: 14, borderLeft: '3px solid #C9A84C' }}>
+              <h4 style={{ margin: '0 0 6px', color: '#0D1B2A' }}>DCF &amp; Valor Intrínseco</h4>
+              <p>
+                El precio justo de una acción es el valor presente de todos sus flujos de caja libres futuros.
+                Compramos solo cuando el precio de mercado ofrece un descuento significativo al valor intrínseco
+                estimado (margen de seguridad ≥ 15%).
+              </p>
+            </div>
+            <div style={{ background: '#F7FAFC', borderRadius: 8, padding: 14, borderLeft: '3px solid #276749' }}>
+              <h4 style={{ margin: '0 0 6px', color: '#0D1B2A' }}>EV/EBITDA &amp; FCF Yield</h4>
+              <p>
+                EV/EBITDA permite comparar empresas de distintos sectores eliminando el efecto de la
+                estructura de capital y los impuestos. FCF Yield (Flujo de Caja Libre / Capitalización
+                bursátil) es la métrica más honesta de retorno real para el accionista. Buscamos FCF Yield &gt; 4%.
+              </p>
+            </div>
+          </div>
+        </Section>
+
+        {/* Buffett/Munger */}
+        <Section title="🏰 Principios Buffett/Munger: Calidad Cualitativa"
+          id="buffett" open={openSections['buffett']} onToggle={toggleSection}>
+          <ul style={{ paddingLeft: 20 }}>
+            <li><strong>Moat Competitivo:</strong> Ventaja económica duradera — marca, efectos de red, costes de
+              cambio, ventaja de coste. El moat protege el ROIC superior durante décadas.</li>
+            <li style={{ marginTop: 6 }}><strong>Management Orientado al Capital:</strong> Directivos que tratan
+              el capital como si fuera su propio dinero. Evaluamos historial de asignación de capital, honestidad
+              en la comunicación y alineación con accionistas.</li>
+            <li style={{ marginTop: 6 }}><strong>Margen de Seguridad:</strong> Nunca pagamos el valor intrínseco
+              completo. El descuento protege contra errores de análisis y sorpresas negativas.</li>
+            <li style={{ marginTop: 6 }}><strong>Horizonte Largo:</strong> "Nuestro horizonte favorito es para
+              siempre." El compounding funciona mejor con décadas, no trimestres.</li>
+          </ul>
+        </Section>
+
+        {/* Process */}
+        <Section title="⚙️ Proceso de Selección (5 Filtros)"
+          id="proceso" open={openSections['proceso']} onToggle={toggleSection}>
+          {[
+            { n: 1, title: 'Filtro Cuantitativo Damodaran', desc: 'ROIC > WACC, FCF Yield > 3%, EV/EBITDA comparado vs sector, Revenue CAGR > 8% en los últimos 3 años, margen de seguridad > 10% vs valor DCF estimado.' },
+            { n: 2, title: 'Filtro Cuantitativo Buffett', desc: 'ROE > 12% sostenido, P/E < 18, Deuda/Equity < 0.6, Margen neto > 15%, generación consistente de FCF por más de 5 años.' },
+            { n: 3, title: 'Filtro Moat Cualitativo', desc: 'Evaluación de la ventaja competitiva: ¿Es duradera? ¿Puede el management defenderla? ¿El mercado la reconoce en el ROE/ROIC histórico?' },
+            { n: 4, title: 'Diversificación Estratégica', desc: 'Máximo 2 posiciones por sector. Exposición geográfica balanceada (US, Europa, mercados emergentes selectivos). Correlaciones bajas entre categorías.' },
+            { n: 5, title: 'Decisión Final con IA', desc: 'Claude analiza el portafolio completo con el framework dual, identifica concentraciones, red flags y genera una decisión de inversión con score 0-100.' },
+          ].map(step => (
+            <div key={step.n} style={{ display: 'flex', gap: 12, marginBottom: 12 }}>
+              <div style={{
+                flexShrink: 0, width: 28, height: 28, borderRadius: '50%',
+                background: '#0D1B2A', color: '#C9A84C',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '0.75rem', fontWeight: 800,
+              }}>{step.n}</div>
+              <div>
+                <strong style={{ color: '#0D1B2A' }}>{step.title}</strong>
+                <p style={{ margin: '2px 0 0', color: '#4A5568' }}>{step.desc}</p>
+              </div>
+            </div>
+          ))}
+        </Section>
+
         {/* T-Bills */}
-        <div className="methodology-section">
-          <h3 style={{ cursor: 'pointer' }} onClick={() => toggleSection('tbills')}>
-            Inclusión de T-Bills en el Portfolio {openSections['tbills'] ? '▲' : '▼'}
-          </h3>
-          {openSections['tbills'] && (
-            <>
-              <p>Siguiendo los principios de Buffett, se recomienda mantener una posición en T-Bills (Letras del Tesoro de EE.UU.) por las siguientes razones:</p>
-              <ul>
-                <li><strong>Reserva de Liquidez:</strong> Proporciona capital disponible para aprovechar oportunidades de mercado cuando surjan.</li>
-                <li><strong>Protección contra Volatilidad:</strong> Ofrece estabilidad al portfolio en periodos de turbulencia del mercado.</li>
-                <li><strong>Rendimiento sin Riesgo:</strong> En el entorno actual, los T-Bills ofrecen rendimientos atractivos con riesgo mínimo.</li>
-              </ul>
-              <p>La asignación recomendada del 25% a T-Bills se basa en un análisis de las condiciones actuales del mercado, incluyendo valoraciones generales moderadamente elevadas y un entorno de tipos de interés relativamente altos. Esta asignación es dinámica y puede ajustarse según cambien las condiciones del mercado.</p>
-            </>
-          )}
-        </div>
-        {/* Horizonte temporal */}
-        <div className="methodology-section">
-          <h3 style={{ cursor: 'pointer' }} onClick={() => toggleSection('horizonte')}>
-            Consideraciones de Horizonte Temporal {openSections['horizonte'] ? '▲' : '▼'}
-          </h3>
-          {openSections['horizonte'] && (
-            <p>El portfolio está diseñado con un enfoque predominantemente a largo plazo (7+ años), siguiendo la filosofía de Buffett: "Mi horizonte de inversión favorito es para siempre". Sin embargo, se han considerado factores a medio plazo (3-7 años) como la expansión del moat y las oportunidades de reinversión, así como factores a corto plazo (1-3 años) para identificar puntos de entrada atractivos.</p>
-          )}
-        </div>
-        {/* Métricas clave */}
-        <div className="methodology-section">
-          <h3 style={{ cursor: 'pointer' }} onClick={() => toggleSection('metricas')}>
-            Métricas Clave Utilizadas {openSections['metricas'] ? '▲' : '▼'}
-          </h3>
-          {openSections['metricas'] && (
-            <table className="metrics-table">
-              <thead>
-                <tr>
-                  <th>Métrica</th>
-                  <th>Descripción</th>
-                  <th>Relevancia para Value Investing</th>
+        <Section title="🛡 Bonos y T-Bills como Ancla del Portafolio"
+          id="tbills" open={openSections['tbills']} onToggle={toggleSection}>
+          <p>
+            La renta fija cumple tres funciones estratégicas en el portafolio:
+          </p>
+          <ul style={{ paddingLeft: 20, marginTop: 10 }}>
+            <li><strong>Reserva de Liquidez:</strong> Capital disponible para aprovechar caídas del mercado sin vender posiciones.</li>
+            <li style={{ marginTop: 6 }}><strong>Reducción de Correlación:</strong> Los bonos gubernamentales tienen correlación negativa con la renta variable en crisis, amortiguando la volatilidad del portafolio.</li>
+            <li style={{ marginTop: 6 }}><strong>Rendimiento sin Riesgo:</strong> Los ETFs de bonos gubernamentales ofrecen rendimientos reales atractivos como alternativa a la liquidez sin retorno.</li>
+          </ul>
+        </Section>
+
+        {/* Horizonte */}
+        <Section title="⏳ Horizonte Temporal y el Poder del Compounding"
+          id="horizonte" open={openSections['horizonte']} onToggle={toggleSection}>
+          <p>
+            El value investing con framework Damodaran requiere tiempo para que el mercado reconozca
+            el valor intrínseco. Buffett: "El tiempo es amigo de los negocios maravillosos y enemigo de los mediocres."
+          </p>
+          <ul style={{ paddingLeft: 20, marginTop: 10 }}>
+            <li><strong>Largo plazo (&gt;10 años):</strong> Ideal para value investing. Permite múltiples ciclos de compounding y reduce el riesgo de valoración.</li>
+            <li style={{ marginTop: 6 }}><strong>Intermedio (5-10 años):</strong> Suficiente para que el mercado corrija subvaloraciones significativas. Incluir más bonos para estabilidad.</li>
+            <li style={{ marginTop: 6 }}><strong>Corto plazo (&lt;5 años):</strong> Value investing subóptimo. Aumentar weight en bonos y reducir growth/disruptivas.</li>
+          </ul>
+        </Section>
+
+        {/* Metrics table */}
+        <Section title="📊 Métricas Clave del Framework Dual"
+          id="metricas" open={openSections['metricas']} onToggle={toggleSection}>
+          <table className="metrics-table">
+            <thead>
+              <tr>
+                <th>Métrica</th>
+                <th>Framework</th>
+                <th>Descripción</th>
+                <th>Umbral Objetivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              {METRIC_KEYS.map(({ key, label, framework }) => (
+                <tr key={key} className={highlightMetrics.includes(key) ? 'highlight-metric' : ''}>
+                  <td style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</td>
+                  <td style={{ whiteSpace: 'nowrap', fontSize: '0.78rem',
+                    color: framework.includes('Damodaran') ? '#1B4F72' : '#276749' }}>
+                    {framework}
+                  </td>
+                  <td>
+                    {key === 'P/E Ratio'          && 'Precio por acción / Beneficio por acción'}
+                    {key === 'ROE'                 && 'Beneficio neto / Patrimonio de accionistas'}
+                    {key === 'ROIC'                && 'NOPAT / Capital invertido (deuda + equity)'}
+                    {key === 'WACC'                && 'Coste medio ponderado de capital (deuda + equity)'}
+                    {key === 'EV/EBITDA'           && 'Valor empresa / EBITDA (excluye estructura capital)'}
+                    {key === 'FCF Yield'           && 'Flujo de Caja Libre / Capitalización bursátil'}
+                    {key === 'Revenue CAGR 5Y'     && 'Tasa compuesta de crecimiento de ingresos (5 años)'}
+                    {key === 'Margen de Beneficio' && 'Beneficio neto / Ingresos totales'}
+                    {key === 'Ratio de Deuda'      && 'Deuda financiera neta / EBITDA'}
+                    {key === 'Moat Cualitativo'    && 'Ventaja competitiva duradera: marca, red, coste, switching'}
+                    {key === 'Margen de Seguridad' && 'Descuento del precio de mercado al valor intrínseco DCF'}
+                  </td>
+                  <td style={{ fontWeight: 600, fontSize: '0.82rem', whiteSpace: 'nowrap' }}>
+                    {key === 'P/E Ratio'          && '< 18'}
+                    {key === 'ROE'                 && '> 15%'}
+                    {key === 'ROIC'                && '> WACC (≥ 15%)'}
+                    {key === 'WACC'                && '< ROIC'}
+                    {key === 'EV/EBITDA'           && '< Sector (razonable)'}
+                    {key === 'FCF Yield'           && '> 4%'}
+                    {key === 'Revenue CAGR 5Y'     && '> 8%'}
+                    {key === 'Margen de Beneficio' && '> 15%'}
+                    {key === 'Ratio de Deuda'      && '< 2.5x'}
+                    {key === 'Moat Cualitativo'    && 'Fuerte o Amplio'}
+                    {key === 'Margen de Seguridad' && '≥ 15%'}
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {METRIC_KEYS.map(({ key, label }) => (
-                  <tr key={key} className={highlightMetrics.includes(key) ? 'highlight-metric' : ''}>
-                    <td>{label}</td>
-                    <td>{
-                      key === 'P/E Ratio' ? 'Precio / Beneficio por acción' :
-                      key === 'ROE' ? 'Retorno sobre el Capital' :
-                      key === 'Margen de Beneficio' ? 'Beneficio Neto / Ingresos' :
-                      key === 'Ratio de Deuda' ? 'Deuda Total / Capital' :
-                      key === 'Crecimiento de FCF' ? 'Tasa de crecimiento del Flujo de Caja Libre' :
-                      key === 'Moat Cualitativo' ? 'Evaluación de ventajas competitivas' : ''
-                    }</td>
-                    <td>{
-                      key === 'P/E Ratio' ? 'Indica cuánto pagan los inversores por cada unidad de beneficio' :
-                      key === 'ROE' ? 'Mide la eficiencia con la que la empresa utiliza el capital de los accionistas' :
-                      key === 'Margen de Beneficio' ? 'Indica la rentabilidad fundamental del negocio' :
-                      key === 'Ratio de Deuda' ? 'Evalúa el riesgo financiero de la empresa' :
-                      key === 'Crecimiento de FCF' ? 'Mide la capacidad de generar efectivo disponible para los accionistas' :
-                      key === 'Moat Cualitativo' ? 'Determina la sostenibilidad de los rendimientos a largo plazo' : ''
-                    }</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+              ))}
+            </tbody>
+          </table>
+        </Section>
       </div>
     </div>
   );
