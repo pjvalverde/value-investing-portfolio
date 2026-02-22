@@ -5,6 +5,7 @@ import HistoricalPerformance from './HistoricalPerformance';
 import DamodaranPanel from './DamodaranPanel';
 import DamodaranWorksheet from './DamodaranWorksheet';
 import StockDeepAnalysis from './StockDeepAnalysis';
+import PortfolioReport from './PortfolioReport';
 import MethodologyDoc from '../MethodologyDoc';
 import './PortfolioBuilder.css';
 
@@ -507,10 +508,11 @@ const PortfolioBuilder = () => {
           <div className="pb-tabs">
             {[
               { id: 'portfolio',   label: '📊 Portafolio' },
+              { id: 'report',      label: '🎯 Informe' },
+              { id: 'analysis',    label: '🔍 Por Acción' },
               { id: 'history',     label: '📈 Rendimiento' },
               { id: 'worksheet',   label: '📋 Worksheet' },
               { id: 'damodaran',   label: '📐 Damodaran' },
-              { id: 'analysis',    label: '🔍 Análisis por Acción' },
               { id: 'methodology', label: '📚 Metodología' },
             ].map(tab => (
               <button
@@ -528,6 +530,10 @@ const PortfolioBuilder = () => {
 
             {activeTab === 'portfolio' && (
               <PortfolioResults portfolio={finalPortfolio} amount={formData.amount} />
+            )}
+
+            {activeTab === 'report' && (
+              <PortfolioReport portfolio={finalPortfolio} />
             )}
 
             {activeTab === 'history' && (
