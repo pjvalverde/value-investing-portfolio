@@ -1,15 +1,17 @@
 {
   "files": {
-    "main.css": "/value-investing-portfolio/static/css/main.99c1fafa.css",
-    "main.js": "/value-investing-portfolio/static/js/main.eaab0ee8.js",
-    "static/js/453.d6ff9e32.chunk.js": "/value-investing-portfolio/static/js/453.d6ff9e32.chunk.js",
-    "index.html": "/value-investing-portfolio/index.html",
-    "main.99c1fafa.css.map": "/value-investing-portfolio/static/css/main.99c1fafa.css.map",
-    "main.eaab0ee8.js.map": "/value-investing-portfolio/static/js/main.eaab0ee8.js.map",
-    "453.d6ff9e32.chunk.js.map": "/value-investing-portfolio/static/js/453.d6ff9e32.chunk.js.map"
+    "main.css": "/value-investing-frontend-clean/static/css/main.057ca9aa.css",
+    "main.js": "/value-investing-frontend-clean/static/js/main.0d29b287.js",
+    "static/js/455.d8f12e1b.chunk.js": "/value-investing-frontend-clean/static/js/455.d8f12e1b.chunk.js",
+    "static/js/453.18b84146.chunk.js": "/value-investing-frontend-clean/static/js/453.18b84146.chunk.js",
+    "index.html": "/value-investing-frontend-clean/index.html",
+    "main.057ca9aa.css.map": "/value-investing-frontend-clean/static/css/main.057ca9aa.css.map",
+    "main.0d29b287.js.map": "/value-investing-frontend-clean/static/js/main.0d29b287.js.map",
+    "455.d8f12e1b.chunk.js.map": "/value-investing-frontend-clean/static/js/455.d8f12e1b.chunk.js.map",
+    "453.18b84146.chunk.js.map": "/value-investing-frontend-clean/static/js/453.18b84146.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.99c1fafa.css",
-    "static/js/main.eaab0ee8.js"
+    "static/css/main.057ca9aa.css",
+    "static/js/main.0d29b287.js"
   ]
 }
