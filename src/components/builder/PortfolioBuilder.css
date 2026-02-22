@@ -530,6 +530,23 @@
 }
 .pb-analysis-empty p { margin-bottom: 16px; }
 
+/* Claude optional summary section */
+.pb-claude-section {
+  margin-top: 32px;
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 24px;
+}
+.pb-claude-section-header { margin-bottom: 20px; }
+.pb-claude-section-header h3 { font-size: 1.05rem; font-weight: 800; color: #0D1B2A; margin: 6px 0 4px; }
+.pb-claude-section-header p  { font-size: 0.8rem; color: #718096; margin: 0; }
+.pb-claude-prompt {
+  text-align: center; padding: 32px 0;
+  color: #718096;
+}
+.pb-claude-prompt p { margin-bottom: 16px; font-size: 0.9rem; }
+
 /* Final actions */
 .pb-final-actions {
   display: flex; gap: 12px; justify-content: center; padding: 8px 0;

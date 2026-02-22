@@ -4,38 +4,10 @@ import ClaudeAnalysisMarkdown from './ClaudeAnalysisMarkdown';
 import HistoricalPerformance from './HistoricalPerformance';
 import DamodaranPanel from './DamodaranPanel';
 import DamodaranWorksheet from './DamodaranWorksheet';
+import StockDeepAnalysis from './StockDeepAnalysis';
 import MethodologyDoc from '../MethodologyDoc';
 import './PortfolioBuilder.css';
 
-/* ── Score gauge SVG ── */
-const ScoreGauge = ({ score }) => {
-  const pct = Math.min(100, Math.max(0, score));
-  const color = pct >= 70 ? '#27AE60' : pct >= 45 ? '#E67E22' : '#C53030';
-  const circumference = 2 * Math.PI * 48;
-  const dash = (pct / 100) * circumference * 0.75;
-  const gap = circumference - dash;
-  const rotation = 135;
-
-  return (
-    <div className="gauge-wrap">
-      <svg viewBox="0 0 120 120" className="gauge-svg">
-        <circle cx="60" cy="60" r="48" fill="none" stroke="#E2E8F0" strokeWidth="10"
-          strokeDasharray={`${circumference * 0.75} ${circumference * 0.25}`}
-          strokeLinecap="round"
-          transform={`rotate(${rotation} 60 60)`}
-        />
-        <circle cx="60" cy="60" r="48" fill="none" stroke={color} strokeWidth="10"
-          strokeDasharray={`${dash} ${gap + circumference * 0.25}`}
-          strokeLinecap="round"
-          transform={`rotate(${rotation} 60 60)`}
-          style={{ transition: 'stroke-dasharray 0.8s ease' }}
-        />
-        <text x="60" y="57" textAnchor="middle" fill={color} fontSize="24" fontWeight="800">{pct}</text>
-        <text x="60" y="72" textAnchor="middle" fill="#A0AEC0" fontSize="9">/100</text>
-      </svg>
-    </div>
-  );
-};
 
 /* ── Step definitions ── */
 const STEPS = [
@@ -123,8 +95,6 @@ const PortfolioBuilder = () => {
   const [finalPortfolio, setFinalPortfolio] = useState(null);
   const [analysisClaude, setAnalysisClaude] = useState('');
   const [analysisLoading, setAnalysisLoading] = useState(false);
-  const [decision, setDecision] = useState(null);
-  const [decisionLoading, setDecisionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('portfolio');
   const [dataSource, setDataSource] = useState(null); // 'perplexity' | 'yfinance' | null
 
@@ -192,51 +162,32 @@ const PortfolioBuilder = () => {
     }
   }, [step, portfolioValue, portfolioGrowth, portfolioBonds, portfolioDisruptivas]);
 
-  /* Claude analysis */
+  /* Claude analysis — triggered manually only to avoid Heroku 30s timeout */
   const fetchClaudeAnalysis = async (portfolio) => {
-    setAnalysisLoading(true); setAnalysisClaude(''); setDecision(null);
+    setAnalysisLoading(true); setAnalysisClaude('');
     try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 55000);
       const resp = await fetch(`${BASE_URL}/api/portfolio/claude-analysis`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ portfolio })
+        body: JSON.stringify({ portfolio }),
+        signal: controller.signal,
       });
+      clearTimeout(timer);
       if (!resp.ok) throw new Error(await resp.text());
       const data = await resp.json();
-      const analysis = data.analysis || '[Sin respuesta de Claude]';
-      setAnalysisClaude(analysis);
-      // Fetch decision after analysis
-      fetchDecision(analysis);
+      setAnalysisClaude(data.analysis || '[Sin respuesta]');
     } catch (err) {
-      setAnalysisClaude(`Error: ${err.message}`);
+      if (err.name === 'AbortError') {
+        setAnalysisClaude('⏱ El análisis tardó demasiado. Intenta de nuevo.');
+      } else {
+        setAnalysisClaude(`Error: ${err.message}`);
+      }
     } finally {
       setAnalysisLoading(false);
     }
   };
-
-  const fetchDecision = async (analysisText) => {
-    setDecisionLoading(true);
-    try {
-      const resp = await fetch(`${BASE_URL}/api/analysis/decision`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ analysis: analysisText })
-      });
-      if (!resp.ok) throw new Error(await resp.text());
-      setDecision(await resp.json());
-    } catch (err) {
-      console.warn('Decision fetch error:', err.message);
-    } finally {
-      setDecisionLoading(false);
-    }
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (step === 6 && finalPortfolio) {
-      fetchClaudeAnalysis(finalPortfolio);
-    }
-  }, [step, finalPortfolio]); // fetchClaudeAnalysis omitted intentionally to avoid infinite loop
 
   /* ── Render ── */
   return (
@@ -538,55 +489,6 @@ const PortfolioBuilder = () => {
       {step === 6 && finalPortfolio && (
         <div className="pb-final">
 
-          {/* Investment Decision Card */}
-          {(decisionLoading || decision) && (
-            <div className={`pb-decision-card ${decision?.decision === 'invertir' ? 'invest' : 'hold'}`}>
-              {decisionLoading && !decision && (
-                <div className="pb-decision-loading">
-                  <div className="pb-spinner pb-spinner-lg" />
-                  <span>El CIO está evaluando tu portafolio…</span>
-                </div>
-              )}
-              {decision && (
-                <div className="pb-decision-inner">
-                  <div className="pb-decision-gauge">
-                    <ScoreGauge score={decision.score} />
-                    <div className={`pb-decision-verdict ${decision.decision === 'invertir' ? 'invest' : 'hold'}`}>
-                      {decision.decision === 'invertir' ? '✓ INVERTIR' : '✗ NO INVERTIR'}
-                    </div>
-                  </div>
-                  <div className="pb-decision-details">
-                    <h3 className="pb-decision-title">Decisión del CIO (Damodaran + Buffett/Munger)</h3>
-                    {decision.damodaran_verdict && (
-                      <div className="pb-verdict-row">
-                        <span className="pb-verdict-icon">📐</span>
-                        <span className="pb-verdict-text">{decision.damodaran_verdict}</span>
-                      </div>
-                    )}
-                    {decision.buffett_verdict && (
-                      <div className="pb-verdict-row">
-                        <span className="pb-verdict-icon">🏰</span>
-                        <span className="pb-verdict-text">{decision.buffett_verdict}</span>
-                      </div>
-                    )}
-                    {decision.reasons?.length > 0 && (
-                      <div className="pb-reasons">
-                        <strong>Razones:</strong>
-                        <ul>{decision.reasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
-                      </div>
-                    )}
-                    {decision.alerts?.length > 0 && (
-                      <div className="pb-alerts">
-                        <strong>⚠ Alertas:</strong>
-                        <ul>{decision.alerts.map((a, i) => <li key={i}>{a}</li>)}</ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
           {/* Data source banner */}
           {dataSource === 'yfinance' && (
             <div className="pb-source-banner">
@@ -608,7 +510,7 @@ const PortfolioBuilder = () => {
               { id: 'history',     label: '📈 Rendimiento' },
               { id: 'worksheet',   label: '📋 Worksheet' },
               { id: 'damodaran',   label: '📐 Damodaran' },
-              { id: 'analysis',    label: '🤖 Análisis IA' },
+              { id: 'analysis',    label: '🔍 Análisis por Acción' },
               { id: 'methodology', label: '📚 Metodología' },
             ].map(tab => (
               <button
@@ -642,38 +544,47 @@ const PortfolioBuilder = () => {
 
             {activeTab === 'analysis' && (
               <div className="pb-analysis-tab">
-                {analysisLoading ? (
-                  <div className="pb-analysis-loading">
-                    <div className="pb-spinner pb-spinner-lg" />
-                    <div>
-                      <p>Generando análisis con Claude…</p>
-                      <p className="pb-analysis-sub">Aplicando framework Damodaran + Buffett/Munger</p>
+                {/* Per-stock deep analysis — instant, no API needed */}
+                <StockDeepAnalysis portfolio={finalPortfolio} />
+
+                {/* Optional Claude text summary — manually triggered */}
+                <div className="pb-claude-section">
+                  <div className="pb-claude-section-header">
+                    <span className="pb-analysis-badge">IA · Claude Sonnet</span>
+                    <h3>Resumen del Portafolio con IA</h3>
+                    <p>Análisis narrativo combinado Damodaran + Buffett/Munger</p>
+                  </div>
+                  {analysisLoading ? (
+                    <div className="pb-analysis-loading">
+                      <div className="pb-spinner pb-spinner-lg" />
+                      <div>
+                        <p>Generando resumen con Claude…</p>
+                        <p className="pb-analysis-sub">Puede tardar hasta 40 segundos</p>
+                      </div>
                     </div>
-                  </div>
-                ) : analysisClaude ? (
-                  <div className="pb-analysis-content">
-                    <div className="pb-analysis-header">
-                      <span className="pb-analysis-badge">IA Analysis</span>
-                      <h3>Análisis del Portafolio</h3>
-                      <p>Claude · Framework: Damodaran + Buffett/Munger</p>
+                  ) : analysisClaude ? (
+                    <div className="pb-analysis-content">
+                      <ClaudeAnalysisMarkdown markdown={analysisClaude} />
+                      <button
+                        className="pb-btn pb-btn-ghost pb-btn-sm"
+                        onClick={() => fetchClaudeAnalysis(finalPortfolio)}
+                        style={{ marginTop: 16 }}
+                      >
+                        ↺ Regenerar resumen IA
+                      </button>
                     </div>
-                    <ClaudeAnalysisMarkdown markdown={analysisClaude} />
-                    <button
-                      className="pb-btn pb-btn-ghost pb-btn-sm"
-                      onClick={() => fetchClaudeAnalysis(finalPortfolio)}
-                      style={{ marginTop: 16 }}
-                    >
-                      ↺ Regenerar análisis
-                    </button>
-                  </div>
-                ) : (
-                  <div className="pb-analysis-empty">
-                    <p>El análisis se generará automáticamente.</p>
-                    <button className="pb-btn pb-btn-primary" onClick={() => fetchClaudeAnalysis(finalPortfolio)}>
-                      Generar Análisis IA
-                    </button>
-                  </div>
-                )}
+                  ) : (
+                    <div className="pb-claude-prompt">
+                      <p>Genera un resumen narrativo del portafolio completo usando IA.</p>
+                      <button
+                        className="pb-btn pb-btn-primary"
+                        onClick={() => fetchClaudeAnalysis(finalPortfolio)}
+                      >
+                        🤖 Generar Resumen IA
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

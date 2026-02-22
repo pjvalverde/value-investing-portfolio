@@ -1,0 +1,180 @@
+/* ── StockDeepAnalysis ── */
+.sda-root { padding: 0 0 32px; }
+
+.sda-header { margin-bottom: 24px; }
+.sda-header h2 { font-size: 1.4rem; font-weight: 700; color: #1a2236; margin: 0 0 4px; }
+.sda-header p  { font-size: 0.85rem; color: #6b7a99; margin: 0; }
+
+.sda-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+/* ── Card ── */
+.sda-card {
+  background: #fff;
+  border: 1px solid #e8ecf4;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: box-shadow .2s;
+}
+.sda-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.09); }
+
+/* Header */
+.sda-card-header {
+  padding: 16px 18px 12px;
+  background: linear-gradient(135deg, #1a2236 0%, #2c3e6b 100%);
+  color: #fff;
+}
+.sda-card-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.sda-ticker {
+  display: inline-block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  margin-right: 8px;
+  color: #f5c842;
+}
+.sda-name {
+  font-size: 0.88rem;
+  color: #c5cfe8;
+}
+.sda-card-meta { display: flex; gap: 6px; flex-wrap: wrap; }
+.sda-chip {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.15);
+  color: #e0e8ff;
+}
+.sda-chip-country { background: rgba(245,200,66,0.2); color: #f5c842; }
+.sda-chip-cat     { background: rgba(99,179,237,0.2); color: #90cdf4; }
+
+/* Score badge */
+.sda-score-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.sda-score-green  { background: rgba(72,187,120,0.25); }
+.sda-score-yellow { background: rgba(237,137,54,0.25); }
+.sda-score-red    { background: rgba(229,62,62,0.25); }
+.sda-score-number {
+  font-size: 1.4rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.sda-score-green  .sda-score-number { color: #68d391; }
+.sda-score-yellow .sda-score-number { color: #fbd38d; }
+.sda-score-red    .sda-score-number { color: #fc8181; }
+.sda-score-label  {
+  font-size: 0.68rem;
+  color: #c5cfe8;
+  margin-top: 2px;
+}
+
+/* Body */
+.sda-card-body { padding: 14px 18px; }
+
+.sda-section { margin-bottom: 14px; }
+.sda-section:last-child { margin-bottom: 0; }
+.sda-section-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #8896b3;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #f0f2f8;
+}
+
+/* Metric rows */
+.sda-metric-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid #f7f8fc;
+}
+.sda-metric-row:last-child { border-bottom: none; }
+.sda-metric-label {
+  font-size: 0.82rem;
+  color: #4a5568;
+  min-width: 130px;
+}
+.sda-metric-value {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1a2236;
+  min-width: 60px;
+  text-align: right;
+}
+.sda-metric-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+.sda-metric-footnote {
+  font-size: 0.68rem;
+  color: #a0aec0;
+  margin-left: auto;
+}
+
+/* Grade colors */
+.sda-green  { background: #f0fff4; color: #276749; }
+.sda-yellow { background: #fffbeb; color: #975a16; }
+.sda-orange { background: #fff5f0; color: #c05621; }
+.sda-red    { background: #fff5f5; color: #c53030; }
+.sda-neutral{ background: #f7fafc; color: #718096; }
+
+/* Valuation block */
+.sda-valuation-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+.sda-val-block { display: flex; flex-direction: column; gap: 2px; }
+.sda-val-label  { font-size: 0.72rem; color: #8896b3; }
+.sda-val-number { font-size: 1rem; font-weight: 700; color: #1a2236; }
+.sda-val-arrow  { font-size: 1.2rem; color: #c5cfe8; }
+.sda-mos-pill {
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-left: auto;
+}
+
+/* Moat */
+.sda-moat-section { background: #fafbff; border-radius: 8px; padding: 10px 12px; }
+.sda-moat-text { font-size: 0.84rem; color: #4a5568; line-height: 1.5; margin: 0; }
+
+.sda-empty {
+  text-align: center;
+  color: #8896b3;
+  padding: 48px 0;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .sda-grid { grid-template-columns: 1fr; }
+  .sda-metric-footnote { display: none; }
+}
