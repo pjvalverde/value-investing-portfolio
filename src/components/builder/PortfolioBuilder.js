@@ -126,6 +126,7 @@ const PortfolioBuilder = () => {
   const [decision, setDecision] = useState(null);
   const [decisionLoading, setDecisionLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('portfolio');
+  const [dataSource, setDataSource] = useState(null); // 'perplexity' | 'yfinance' | null
 
   const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'https://value-investing-5b425882ff1a.herokuapp.com';
 
@@ -146,7 +147,10 @@ const PortfolioBuilder = () => {
         body: JSON.stringify({ amount })
       });
       if (!resp.ok) throw new Error(await resp.text());
-      setter(await resp.json());
+      const data = await resp.json();
+      setter(data);
+      // Track data source (perplexity or yfinance fallback)
+      if (data.source) setDataSource(data.source);
       if (nextStep) setStep(nextStep);
     } catch (err) {
       setError(err.message || `Error al buscar ${category}`);
@@ -580,6 +584,20 @@ const PortfolioBuilder = () => {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Data source banner */}
+          {dataSource === 'yfinance' && (
+            <div className="pb-source-banner">
+              <span>📊</span>
+              <span>Datos en tiempo real vía <strong>Yahoo Finance</strong> (yfinance). La clave de Perplexity AI está vencida — renuévala en <a href="https://www.perplexity.ai/settings/api" target="_blank" rel="noreferrer">perplexity.ai/settings/api</a> y actualiza tu <code>.env</code>.</span>
+            </div>
+          )}
+          {dataSource === 'perplexity' && (
+            <div className="pb-source-banner pb-source-ok">
+              <span>✓</span>
+              <span>Datos y recomendaciones por <strong>Perplexity AI</strong> (sonar-pro)</span>
             </div>
           )}
 
