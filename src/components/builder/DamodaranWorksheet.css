@@ -1,0 +1,516 @@
+/* ── DamodaranWorksheet.css ── */
+
+.ws-root {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+}
+
+.ws-empty {
+  padding: 48px;
+  text-align: center;
+  color: #718096;
+  font-size: 0.95rem;
+}
+
+/* Header */
+.ws-header {
+  background: linear-gradient(135deg, #0D1B2A 0%, #1a3a5c 100%);
+  padding: 20px 28px;
+  border-bottom: 3px solid #C9A84C;
+}
+
+.ws-header h2 {
+  color: #C9A84C;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0 0 4px;
+  letter-spacing: 0.5px;
+}
+
+.ws-header p {
+  color: #A0AEC0;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.ws-header strong {
+  color: #fff;
+}
+
+/* Sub-tabs */
+.ws-tabs {
+  display: flex;
+  gap: 2px;
+  background: #F7FAFC;
+  border-bottom: 1px solid #E2E8F0;
+  padding: 0 4px;
+  overflow-x: auto;
+}
+
+.ws-tab-btn {
+  padding: 11px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #718096;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.ws-tab-btn:hover {
+  color: #0D1B2A;
+  background: #EDF2F7;
+}
+
+.ws-tab-btn.active {
+  color: #0D1B2A;
+  border-bottom-color: #C9A84C;
+  background: #fff;
+}
+
+/* Content area */
+.ws-content {
+  padding: 0;
+}
+
+/* Section */
+.ws-section {
+  padding: 24px 28px;
+}
+
+.ws-section-header {
+  margin-bottom: 20px;
+}
+
+.ws-section-header h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0D1B2A;
+  margin: 0 0 4px;
+}
+
+.ws-section-header p {
+  font-size: 0.82rem;
+  color: #718096;
+  margin: 0;
+}
+
+/* Table wrapper */
+.ws-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+}
+
+.ws-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.ws-table thead tr {
+  background: #0D1B2A;
+}
+
+.ws-table th {
+  padding: 10px 12px;
+  text-align: left;
+  color: #C9A84C;
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.ws-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid #EDF2F7;
+  color: #2D3748;
+  vertical-align: middle;
+}
+
+.ws-table tbody tr:hover {
+  background: #F7FAFC;
+}
+
+.ws-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Number cells */
+.cell-num {
+  text-align: right;
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+/* Traffic light cells */
+.cell-green  { color: #276749; background: #F0FFF4; font-weight: 600; }
+.cell-yellow { color: #744210; background: #FFFFF0; font-weight: 600; }
+.cell-red    { color: #742A2A; background: #FFF5F5; font-weight: 600; }
+.cell-gray   { color: #718096; }
+
+/* Header coloring for reference table */
+.cell-green-h  { background: #E6FFFA; color: #276749; font-weight: 700; }
+.cell-yellow-h { background: #FFFFF0; color: #744210; font-weight: 700; }
+.cell-red-h    { background: #FFF5F5; color: #742A2A; font-weight: 700; }
+
+/* Ticker badge */
+.ws-ticker {
+  display: inline-block;
+  background: #0D1B2A;
+  color: #C9A84C;
+  font-family: 'SF Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.ws-name {
+  color: #4A5568;
+  font-size: 0.82rem;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ws-sector {
+  color: #718096;
+  font-size: 0.78rem;
+  max-width: 130px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Category badges */
+.ws-cat {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.4px;
+}
+.ws-cat-value       { background: #EBF8FF; color: #1B4F72; }
+.ws-cat-growth      { background: #E6FFFA; color: #276749; }
+.ws-cat-bonds       { background: #FFFDE7; color: #7D5A00; }
+.ws-cat-disruptivas { background: #F3E8FF; color: #6B46C1; }
+
+/* Badge */
+.ws-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+.badge-green  { background: #C6F6D5; color: #22543D; }
+.badge-yellow { background: #FEFCBF; color: #744210; }
+.badge-orange { background: #FEEBC8; color: #7B341E; }
+.badge-red    { background: #FED7D7; color: #742A2A; }
+
+/* Score bar in screener */
+.ws-score-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ws-score-bar {
+  height: 6px;
+  background: #EDF2F7;
+  border-radius: 3px;
+  flex: 1;
+  min-width: 60px;
+}
+
+.ws-score-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.ws-score-label {
+  font-size: 0.72rem;
+  color: #718096;
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+/* Legend row */
+.ws-legend-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 0.78rem;
+  color: #718096;
+  flex-wrap: wrap;
+}
+
+.dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 4px;
+}
+.dot-green  { background: #27AE60; }
+.dot-yellow { background: #E67E22; }
+.dot-red    { background: #C53030; }
+
+.ws-legend-sep {
+  color: #CBD5E0;
+}
+
+/* ── Multiples tab ── */
+.ws-mult-block {
+  margin-bottom: 24px;
+  background: #F7FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.ws-mult-title {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ws-mult-title strong {
+  font-size: 0.95rem;
+  color: #0D1B2A;
+}
+
+.ws-mult-bench {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
+.ws-mult-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ws-mult-card {
+  background: #fff;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.ws-mult-card.badge-green  { border-color: #9AE6B4; background: #F0FFF4; }
+.ws-mult-card.badge-yellow { border-color: #FAF089; background: #FFFFF0; }
+.ws-mult-card.badge-red    { border-color: #FEB2B2; background: #FFF5F5; }
+
+.ws-mult-ticker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0D1B2A;
+  font-family: monospace;
+}
+
+.ws-mult-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #0D1B2A;
+  font-family: 'SF Mono', monospace;
+}
+
+.ws-mult-label {
+  font-size: 0.62rem;
+}
+
+/* ── Margin of Safety tab ── */
+.ws-mos-bar-wrap {
+  position: relative;
+  height: 8px;
+  background: #EDF2F7;
+  border-radius: 4px;
+  min-width: 100px;
+  overflow: hidden;
+}
+
+.ws-mos-center {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #CBD5E0;
+}
+
+.ws-mos-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 2px;
+}
+
+.ws-mos-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.ws-info-box {
+  padding: 14px 16px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ws-info-box strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.ws-info-box span {
+  font-size: 0.78rem;
+}
+
+.ws-info-green  { background: #F0FFF4; border: 1px solid #9AE6B4; color: #276749; }
+.ws-info-yellow { background: #FFFFF0; border: 1px solid #FAF089; color: #744210; }
+.ws-info-red    { background: #FFF5F5; border: 1px solid #FEB2B2; color: #742A2A; }
+
+/* ── DCF / ROIC tab ── */
+.ws-roic-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.ws-roic-card {
+  border-radius: 10px;
+  padding: 14px 18px;
+  min-width: 120px;
+  text-align: center;
+  border: 1px solid #E2E8F0;
+}
+
+.ws-roic-good    { background: #F0FFF4; border-color: #9AE6B4; }
+.ws-roic-bad     { background: #FFF5F5; border-color: #FEB2B2; }
+.ws-roic-unknown { background: #F7FAFC; border-color: #E2E8F0; }
+
+.ws-roic-ticker {
+  font-family: 'SF Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #0D1B2A;
+}
+
+.ws-roic-name {
+  font-size: 0.72rem;
+  color: #718096;
+  margin: 2px 0 6px;
+}
+
+.ws-roic-spread {
+  font-size: 1.4rem;
+  font-weight: 800;
+  font-family: 'SF Mono', monospace;
+  color: #0D1B2A;
+}
+
+.ws-roic-label {
+  font-size: 0.65rem;
+  color: #A0AEC0;
+  margin-top: 2px;
+}
+
+.ws-roic-verdict {
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 6px;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.ws-rv-green { background: #C6F6D5; color: #22543D; }
+.ws-rv-red   { background: #FED7D7; color: #742A2A; }
+
+.ws-roic-na {
+  font-size: 0.72rem;
+  color: #A0AEC0;
+  margin-top: 8px;
+}
+
+.ws-footnote {
+  font-size: 0.75rem;
+  color: #A0AEC0;
+  margin-top: 12px;
+  font-style: italic;
+}
+
+/* ── Reference tab ── */
+.ws-ref-block {
+  margin-bottom: 28px;
+}
+
+.ws-ref-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0D1B2A;
+  margin: 0 0 10px;
+  padding-left: 4px;
+  border-left: 4px solid #C9A84C;
+}
+
+.ws-ref-table td:first-child {
+  font-weight: 600;
+  color: #0D1B2A;
+}
+
+.ws-formula {
+  font-family: 'SF Mono', monospace;
+  font-size: 0.76rem;
+  color: #4A5568;
+}
+
+.ws-note {
+  font-size: 0.78rem;
+  color: #718096;
+}
+
+.ws-attribution {
+  margin-top: 20px;
+  font-size: 0.75rem;
+  color: #A0AEC0;
+  text-align: center;
+  padding: 12px;
+  border-top: 1px solid #EDF2F7;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ws-section { padding: 16px; }
+  .ws-mult-cards { gap: 8px; }
+  .ws-mult-card  { min-width: 90px; }
+  .ws-roic-cards { gap: 8px; }
+  .ws-mos-info   { grid-template-columns: 1fr; }
+}

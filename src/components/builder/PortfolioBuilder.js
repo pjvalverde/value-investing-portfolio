@@ -3,6 +3,7 @@ import PortfolioResults from './PortfolioResults';
 import ClaudeAnalysisMarkdown from './ClaudeAnalysisMarkdown';
 import HistoricalPerformance from './HistoricalPerformance';
 import DamodaranPanel from './DamodaranPanel';
+import DamodaranWorksheet from './DamodaranWorksheet';
 import MethodologyDoc from '../MethodologyDoc';
 import './PortfolioBuilder.css';
 
@@ -587,6 +588,7 @@ const PortfolioBuilder = () => {
             {[
               { id: 'portfolio',   label: '📊 Portafolio' },
               { id: 'history',     label: '📈 Rendimiento' },
+              { id: 'worksheet',   label: '📋 Worksheet' },
               { id: 'damodaran',   label: '📐 Damodaran' },
               { id: 'analysis',    label: '🤖 Análisis IA' },
               { id: 'methodology', label: '📚 Metodología' },
@@ -610,6 +612,10 @@ const PortfolioBuilder = () => {
 
             {activeTab === 'history' && (
               <HistoricalPerformance portfolio={finalPortfolio} baseUrl={BASE_URL} />
+            )}
+
+            {activeTab === 'worksheet' && (
+              <DamodaranWorksheet portfolio={finalPortfolio} />
             )}
 
             {activeTab === 'damodaran' && (
